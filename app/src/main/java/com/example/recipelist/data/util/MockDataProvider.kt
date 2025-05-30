@@ -16,7 +16,8 @@ object MockDataProvider {
                                             Ingredient("Ovo", 2.0f, "un"),
                                             Ingredient("Sal", 1.0f, "pitada")
                                     ),
-                            defaultServings = 4
+                            defaultServings = 4,
+                            isFavorite = false
                     ),
                     Recipe(
                             id = 2,
@@ -29,7 +30,8 @@ object MockDataProvider {
                                             Ingredient("Óleo", 1.0f, "xíc"),
                                             Ingredient("Ovo", 4.0f, "un")
                                     ),
-                            defaultServings = 8
+                            defaultServings = 8,
+                            isFavorite = false
                     ),
                     Recipe(
                             id = 3,
@@ -42,7 +44,8 @@ object MockDataProvider {
                                             Ingredient("Creme de leite", 1.0f, "caixa"),
                                             Ingredient("Milho verde", 1.0f, "lata")
                                     ),
-                            defaultServings = 6
+                            defaultServings = 6,
+                            isFavorite = false
                     )
             )
 }

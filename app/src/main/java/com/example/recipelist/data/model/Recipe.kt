@@ -3,5 +3,7 @@ data class Recipe(
         val id: Int,
         val name: String,
         val ingredients: List<Ingredient>,
-        val defaultServings: Int
+        val defaultServings: Int,
+        val imageRes: Int,
+        val description: String
 )

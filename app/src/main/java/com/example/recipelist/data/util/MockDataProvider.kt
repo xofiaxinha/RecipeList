@@ -1,5 +1,6 @@
 package com.example.recipelist.data.util
 
+import com.example.recipelist.R
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 
@@ -18,6 +19,8 @@ object MockDataProvider {
                                     ),
                             defaultServings = 4,
                             isFavorite = false
+                            imageRes = R.drawable.ic_launcher_background,
+                            description = "Panqueca"
                     ),
                     Recipe(
                             id = 2,
@@ -32,6 +35,8 @@ object MockDataProvider {
                                     ),
                             defaultServings = 8,
                             isFavorite = false
+                            imageRes = R.drawable.ic_launcher_background,
+                            description = "Bolo"
                     ),
                     Recipe(
                             id = 3,
@@ -46,6 +51,8 @@ object MockDataProvider {
                                     ),
                             defaultServings = 6,
                             isFavorite = false
+                            imageRes = R.drawable.ic_launcher_background,
+                            description = "Arroz"
                     )
             )
 }

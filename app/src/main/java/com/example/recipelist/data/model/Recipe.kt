@@ -5,6 +5,8 @@ data class Recipe(
         val ingredients: List<Ingredient>,
         val defaultServings: Int,
         val isFavorite: Boolean
+        val imageRes: Int,
+        val description: String
 )
 enum class RecipeFilter {
         ALL,

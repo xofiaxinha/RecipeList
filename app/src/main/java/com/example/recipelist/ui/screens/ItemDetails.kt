@@ -38,42 +38,19 @@ import com.example.recipelist.data.model.Recipe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDetails(item: Recipe){
+fun ItemDetails(itemList: List<Recipe>, itemId: Int){
+    val item = itemList.find { it.id == itemId }
     var selectedIngredients = emptyList<Ingredient>()
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                actions = {
-                    IconButton(onClick = { /* ação do menu */ }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
-                    }
-                },
-                title = { Text(
-                    text = "Recipe Cart",
-                    style = MaterialTheme.typography.titleLarge
-                ) },
-                //floatingActionButton = {
-                //  FloatingActionButton(onClick = {}) {
-                //    Icon(Icons.Filled.Add, contentDescription = "Adicionar ingredientes à lista")
-                // }
-                //}
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xD64D50ff),
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
-
-                )
-            )
-        }
-    ) { innerPadding ->
-        Row(modifier = Modifier.padding(innerPadding)){
+    item?.let {
+        Row(modifier = Modifier.padding(16.dp)) {
             Column(
                 modifier = Modifier.padding(32.dp).fillMaxWidth(),
             ) {
                 Image(
                     painter = painterResource(id = item.imageRes),
                     contentDescription = item.name,
-                    modifier = Modifier.size(300.dp).clip(CircleShape).align(Alignment.CenterHorizontally),
+                    modifier = Modifier.size(300.dp).clip(CircleShape)
+                        .align(Alignment.CenterHorizontally),
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.Center
                 )
@@ -91,7 +68,7 @@ fun ItemDetails(item: Recipe){
 
                 Spacer(modifier = Modifier.height(16.dp))
                 LazyColumn {
-                    items(item.ingredients){ ingrediente->
+                    items(item.ingredients) { ingrediente ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -115,7 +92,8 @@ fun ItemDetails(item: Recipe){
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {},
-                    modifier = Modifier.align(Alignment.End)) {
+                    modifier = Modifier.align(Alignment.End)
+                ) {
                     Text(
                         text = if (selectedIngredients.isEmpty() || selectedIngredients.size == item.ingredients.size) "Adicionar todos os ingredientes" else "Adicionar ingredientes",
                         style = MaterialTheme.typography.titleSmall
@@ -123,9 +101,14 @@ fun ItemDetails(item: Recipe){
                 }
             }
         }
+    }?: run {
+        Text(
+            text = "Receita não encontrada"
+        )
     }
-}
+    }
 
+/*
 @Preview
 @Composable
 fun ItemDetailsPreview(){
@@ -145,4 +128,4 @@ fun ItemDetailsPreview(){
         isFavorite = false
     )
     ItemDetails(recipe)
-}
+}*/

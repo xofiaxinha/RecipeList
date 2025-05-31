@@ -18,7 +18,7 @@ object MockDataProvider {
                                             Ingredient("Sal", 1.0f, "pitada")
                                     ),
                             defaultServings = 4,
-                            isFavorite = false
+                            isFavorite = false,
                             imageRes = R.drawable.ic_launcher_background,
                             description = "Panqueca"
                     ),
@@ -34,7 +34,7 @@ object MockDataProvider {
                                             Ingredient("Ovo", 4.0f, "un")
                                     ),
                             defaultServings = 8,
-                            isFavorite = false
+                            isFavorite = false,
                             imageRes = R.drawable.ic_launcher_background,
                             description = "Bolo"
                     ),
@@ -50,7 +50,7 @@ object MockDataProvider {
                                             Ingredient("Milho verde", 1.0f, "lata")
                                     ),
                             defaultServings = 6,
-                            isFavorite = false
+                            isFavorite = false,
                             imageRes = R.drawable.ic_launcher_background,
                             description = "Arroz"
                     )

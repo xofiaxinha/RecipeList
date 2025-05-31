@@ -4,7 +4,7 @@ data class Recipe(
         val name: String,
         val ingredients: List<Ingredient>,
         val defaultServings: Int,
-        val isFavorite: Boolean
+        val isFavorite: Boolean,
         val imageRes: Int,
         val description: String
 )

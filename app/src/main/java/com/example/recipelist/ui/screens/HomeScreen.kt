@@ -28,46 +28,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.data.util.MockDataProvider
 import com.example.recipelist.ui.components.CardRecipe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(recipes: List<Recipe>){
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                actions = {
-                    IconButton(onClick = { /* ação do menu */ }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
-                    }
-                },
-                title = { Text(
-                    text = "Recipe Cart",
-                    style = MaterialTheme.typography.titleLarge
-                ) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xD64D50ff),
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
-
-                )
-            )
-        },
-
-    ) {
-        innerPaddinng ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPaddinng)
+fun HomeScreen(recipes: List<Recipe>, navController: NavHostController){
+    LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(16.dp)
         ) {
             items (recipes) { item ->
-                CardRecipe(item)
+                CardRecipe(item, navController)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-
-    }
 }
 
 @Composable

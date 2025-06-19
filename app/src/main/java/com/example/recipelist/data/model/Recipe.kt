@@ -8,6 +8,7 @@ data class Recipe(
         val ingredients: List<Ingredient>, // lista de ingredientes
         val defaultServings: Int, // porções padrão
         val isFavorite: Boolean // se é receita favorita ou não
+        val imageRes: Int
 )
 
 // enum para filtrar receitas

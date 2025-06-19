@@ -26,12 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.R
 
 @Composable
-fun CardRecipe(recipe: Recipe){
+fun CardRecipe(recipe: Recipe, navController: NavHostController){
     Card (
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(8.dp)
@@ -63,7 +64,7 @@ fun CardRecipe(recipe: Recipe){
                 //Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     modifier = Modifier.padding(10.dp).align(Alignment.End),
-                    onClick = {}) {
+                    onClick = {navController.navigate("itemDetails/${recipe.id}")}) {
                     Text(
                         text = "Ver receita completa",
                         style = MaterialTheme.typography.titleSmall

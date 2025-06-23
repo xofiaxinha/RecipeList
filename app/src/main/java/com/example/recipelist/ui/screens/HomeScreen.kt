@@ -1,5 +1,6 @@
 package com.example.recipelist.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -36,7 +37,7 @@ import com.example.recipelist.ui.components.CardRecipe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(recipes: List<Recipe>, navController: NavHostController){
+fun HomeScreen(recipes: List<Recipe>, navController: NavHostController, context: Context){
     LazyColumn(
             modifier = Modifier.fillMaxSize().padding(16.dp)
         ) {
@@ -46,10 +47,10 @@ fun HomeScreen(recipes: List<Recipe>, navController: NavHostController){
             }
         }
 }
-
+/*
 @Composable
 @Preview
 fun HomeScreenPreview(){
     var a = MockDataProvider
     HomeScreen(a.sampleRecipes)
-}
+}*/

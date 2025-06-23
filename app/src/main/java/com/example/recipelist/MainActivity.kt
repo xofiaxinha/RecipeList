@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
@@ -40,75 +41,64 @@ import com.example.recipelist.ui.theme.RecipeListTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        val receitasMockadas = MockDataProvider.sampleRecipes
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val navController = rememberNavController()
-            val scope = rememberCoroutineScope()
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
             RecipeListTheme {
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    gesturesEnabled = true,
-                    drawerContent = { DrawerContent(navController) },
-                    content = {
-                        Scaffold(
-                            topBar = {
-                                TopAppBar(
-                                    actions = {
-                                        IconButton(onClick = { scope.launch { drawerState.open() }}) {
-                                            Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
-                                        }
-                                    },
-                                    title = { Text(
-                                        text = "Recipe Cart",
-                                        style = MaterialTheme.typography.titleLarge
-                                    ) },
-                                    colors = TopAppBarDefaults.topAppBarColors(
-                                        containerColor = Color(0xD64D50ff),
-                                        titleContentColor = Color.White,
-                                        actionIconContentColor = Color.White
-
-                                    )
-                                )
-                            },
-
-                            ) { innerPaddinng ->
-                            NavHost(
-                                navController = rememberNavController(),
-                                startDestination = "home",
-                                modifier = Modifier.padding((innerPaddinng))
-                            ) {
-                                composable("home") { HomeScreen(receitasMockadas, navController) }
-                                composable("itemDetails/{itemId}") { backStackEntry ->
-                                    val recipeId = backStackEntry.arguments?.getString("itemId")
-                                    ItemDetails(itemList = receitasMockadas, recipeId?.toInt() ?: 0)
-                                }
-                                composable("list") { ShoppingListScreen() }
-                            }
-                        }
-                    }
-                )
-            }
+                MainScreen()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+fun MainScreen(){
+    val receitasMockadas = MockDataProvider.sampleRecipes
+    val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = true,
+        drawerContent = { DrawerContent(navController) },
+        content = {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        actions = {
+                            IconButton(onClick = { scope.launch { drawerState.open() }}) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
+                            }
+                        },
+                        title = { Text(
+                            text = "Recipe Cart",
+                            style = MaterialTheme.typography.titleLarge
+                        ) },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color(0xD64D50ff),
+                            titleContentColor = Color.White,
+                            actionIconContentColor = Color.White
+
+                        )
+                    )
+                },
+
+                ) { innerPaddinng ->
+                NavHost(
+                    navController = navController,
+                    startDestination = "home",
+                    modifier = Modifier.padding((innerPaddinng))
+                ) {
+                    composable("home") { HomeScreen(receitasMockadas, navController, context = LocalContext.current) }
+                    composable("itemDetails/{id}") { backStackEntry ->
+                        val recipeId = backStackEntry.arguments?.getString("id")
+                        ItemDetails(itemList = receitasMockadas, itemId = recipeId?.toInt() ?: 0)
+                    }
+                    composable("lista") { ShoppingListScreen() }
+                }
+            }
+        }
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RecipeListTheme {
-        Greeting("Android")
-    }
 }

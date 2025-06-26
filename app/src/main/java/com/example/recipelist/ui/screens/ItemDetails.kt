@@ -47,8 +47,8 @@ fun ItemDetails(itemList: List<Recipe>, itemId: Int){
                 modifier = Modifier.padding(32.dp).fillMaxWidth(),
             ) {
                 Image(
-                    painter = painterResource(id = item.imageRes),
-                    contentDescription = item.name,
+                    painter = painterResource(id = it.imageRes),
+                    contentDescription = it.name,
                     modifier = Modifier.size(300.dp).clip(CircleShape)
                         .align(Alignment.CenterHorizontally),
                     contentScale = ContentScale.Crop,
@@ -58,17 +58,17 @@ fun ItemDetails(itemList: List<Recipe>, itemId: Int){
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = item.name,
+                    text = it.name,
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    text = item.description,
+                    text = it.description,
                     style = MaterialTheme.typography.titleSmall
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
                 LazyColumn {
-                    items(item.ingredients) { ingrediente ->
+                    items(it.ingredients) { ingrediente ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -95,7 +95,7 @@ fun ItemDetails(itemList: List<Recipe>, itemId: Int){
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(
-                        text = if (selectedIngredients.isEmpty() || selectedIngredients.size == item.ingredients.size) "Adicionar todos os ingredientes" else "Adicionar ingredientes",
+                        text = if (selectedIngredients.isEmpty() || selectedIngredients.size == it.ingredients.size) "Adicionar todos os ingredientes" else "Adicionar ingredientes",
                         style = MaterialTheme.typography.titleSmall
                     )
                 }

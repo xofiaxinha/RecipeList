@@ -17,6 +17,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import com.example.recipelist.data.model.Ingredient
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -29,18 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.recipelist.data.model.Ingredient
 
 @Composable
 fun ShoppingListScreen() {
     var itemName by remember { mutableStateOf("") }
-    var quantityString by remember { mutableStateOf("")}
+    var quantityString by remember { mutableStateOf("") }
     var quantity = quantityString.toFloat()
     var unit by remember { mutableStateOf("") }
 
     val shoppingList = remember { mutableStateListOf<Ingredient>() }
 
-    Column(
+    Column (
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -49,15 +50,16 @@ fun ShoppingListScreen() {
         Text("Adicionar Item", style = MaterialTheme.typography.titleLarge)
 
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
+
+        TextField(
             value = itemName,
             onValueChange = { itemName = it },
             label = { Text("Nome do item") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
+        Row (
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

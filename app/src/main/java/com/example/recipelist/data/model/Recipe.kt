@@ -7,8 +7,9 @@ data class Recipe(
         val name: String, // nome da receita
         val ingredients: List<Ingredient>, // lista de ingredientes
         val defaultServings: Int, // porções padrão
-        val isFavorite: Boolean // se é receita favorita ou não
-        val imageRes: Int
+        val isFavorite: Boolean, // se é receita favorita ou não
+        val imageRes: Int,
+        val description: String,
 )
 
 // enum para filtrar receitas

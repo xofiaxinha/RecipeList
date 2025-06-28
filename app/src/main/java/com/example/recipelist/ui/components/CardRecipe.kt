@@ -1,6 +1,7 @@
 package com.example.recipelist.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.R
@@ -34,8 +38,8 @@ import com.example.recipelist.R
 @Composable
 fun CardRecipe(recipe: Recipe, navController: NavHostController){
     Card (
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(8.dp)
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
+
     ){
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -61,13 +65,16 @@ fun CardRecipe(recipe: Recipe, navController: NavHostController){
                     text = recipe.description,
                     style = MaterialTheme.typography.titleMedium
                 )
-                //Spacer(modifier = Modifier.height(4.dp))
                 Button(
-                    modifier = Modifier.padding(10.dp).align(Alignment.End),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE63244)
+                    ),
+                    modifier = Modifier.align(Alignment.End),
                     onClick = {navController.navigate("itemDetails/${recipe.id}")}) {
                     Text(
-                        text = "Ver receita completa",
+                        text = "ver receita",
                         style = MaterialTheme.typography.titleSmall
+
                     )
                 }
             }
@@ -75,7 +82,7 @@ fun CardRecipe(recipe: Recipe, navController: NavHostController){
     }
 }
 
-/*
+
 @Preview
 @Composable
 fun CardRecipePreview(){
@@ -92,6 +99,7 @@ fun CardRecipePreview(){
                 Ingredient("Ovo", 2.0f, "un"),
                 Ingredient("Sal", 1.0f, "pitada")
             ),
+        isFavorite = false
     )
-    CardRecipe(recipe)
-}*/
+    CardRecipe(recipe, navController = rememberNavController())
+}

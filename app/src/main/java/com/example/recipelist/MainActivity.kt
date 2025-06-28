@@ -1,5 +1,6 @@
 package com.example.recipelist
 
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,10 +35,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.data.util.MockDataProvider
 import com.example.recipelist.ui.components.DrawerContent
+import com.example.recipelist.ui.components.TopBar
 import com.example.recipelist.ui.screens.HomeScreen
 import com.example.recipelist.ui.screens.ItemDetails
 import com.example.recipelist.ui.screens.ShoppingListScreen
 import com.example.recipelist.ui.theme.RecipeListTheme
+
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -47,6 +50,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             RecipeListTheme {
                 MainScreen()
+            }
         }
     }
 }
@@ -65,25 +69,12 @@ fun MainScreen(){
         content = {
             Scaffold(
                 topBar = {
-                    TopAppBar(
-                        actions = {
-                            IconButton(onClick = { scope.launch { drawerState.open() }}) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
-                            }
-                        },
-                        title = { Text(
-                            text = "Recipe Cart",
-                            style = MaterialTheme.typography.titleLarge
-                        ) },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color(0xD64D50ff),
-                            titleContentColor = Color.White,
-                            actionIconContentColor = Color.White
-
-                        )
+                    TopBar(
+                        drawerState = drawerState,
+                        scope = scope,
+                        backgroundColor = Color.White
                     )
-                },
-
+                }
                 ) { innerPaddinng ->
                 NavHost(
                     navController = navController,
@@ -101,4 +92,9 @@ fun MainScreen(){
         }
     )
 }
+
+@Preview
+@Composable
+fun MainScreenPreview(){
+    MainScreen()
 }

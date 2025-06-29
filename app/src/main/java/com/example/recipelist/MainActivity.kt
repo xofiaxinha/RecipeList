@@ -35,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.data.util.MockDataProvider
 import com.example.recipelist.ui.components.DrawerContent
+import com.example.recipelist.ui.components.RequestNotificationPermission
 import com.example.recipelist.ui.components.TopBar
 import com.example.recipelist.ui.screens.HomeScreen
 import com.example.recipelist.ui.screens.ItemDetails
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RecipeListTheme {
+                RequestNotificationPermission()
                 MainScreen()
             }
         }

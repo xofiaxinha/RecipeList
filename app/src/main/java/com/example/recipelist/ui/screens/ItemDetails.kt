@@ -1,5 +1,7 @@
 package com.example.recipelist.ui.screens
 
+import android.content.Context
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,19 +31,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.recipelist.R
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.utils.NotificationManager
 import com.example.recipelist.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int){
+@RequiresPermission("android.permission.POST_NOTIFICATIONS")
+fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int, context: Context = LocalContext.current){
     val item = homeViewModel.recipes.find { it.id == itemId }
     var selectedIngredients = emptyList<Ingredient>()
+    val notificationManager = NotificationManager()
+    notificationManager.createNotificationChannel(context)
     item?.let {
         Row(modifier = Modifier.padding(16.dp)) {
             Column(
@@ -77,9 +84,9 @@ fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int){
                                 checked = selectedIngredients.contains(ingrediente),
                                 onCheckedChange = { isChecked ->
                                     if (isChecked) {
-                                        selectedIngredients = selectedIngredients + ingrediente
-                                    } else {
                                         selectedIngredients = selectedIngredients - ingrediente
+                                    } else {
+                                        selectedIngredients = selectedIngredients + ingrediente
                                     }
                                 }
                             )
@@ -92,7 +99,7 @@ fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int){
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = {},
+                    onClick = { notificationManager.sendNotification(context, title = "Ingredientes adicionados com sucesso!", message = "Vamos fazer compras?") },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(

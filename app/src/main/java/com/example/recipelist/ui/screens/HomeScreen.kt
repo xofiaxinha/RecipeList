@@ -1,6 +1,7 @@
 package com.example.recipelist.ui.screens
 
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -45,6 +47,7 @@ import com.example.recipelist.viewmodel.HomeViewModel
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavHostController){
     val recipes = homeViewModel.recipes
     val isLoading = homeViewModel.isLoading
+    val context = LocalContext.current
 
     LaunchedEffect (Unit){
         homeViewModel.fetchRecipes()

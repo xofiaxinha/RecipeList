@@ -35,11 +35,12 @@ import androidx.compose.ui.unit.dp
 import com.example.recipelist.R
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDetails(itemList: List<Recipe>, itemId: Int){
-    val item = itemList.find { it.id == itemId }
+fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int){
+    val item = homeViewModel.recipes.find { it.id == itemId }
     var selectedIngredients = emptyList<Ingredient>()
     item?.let {
         Row(modifier = Modifier.padding(16.dp)) {

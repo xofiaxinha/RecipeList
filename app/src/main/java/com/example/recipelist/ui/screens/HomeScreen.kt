@@ -1,6 +1,7 @@
 package com.example.recipelist.ui.screens
 
 import android.content.Context
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -24,7 +26,9 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,18 +38,34 @@ import androidx.navigation.NavHostController
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.data.util.MockDataProvider
 import com.example.recipelist.ui.components.CardRecipe
+import com.example.recipelist.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(recipes: List<Recipe>, navController: NavHostController, context: Context){
+fun HomeScreen(homeViewModel: HomeViewModel, navController: NavHostController){
+    val recipes = homeViewModel.recipes
+    val isLoading = homeViewModel.isLoading
+
+    LaunchedEffect (Unit){
+        homeViewModel.fetchRecipes()
+    }
     LazyColumn(
             modifier = Modifier.fillMaxSize().padding(16.dp)
         ) {
-            items (recipes) { item ->
+        if (isLoading) {
+            item {
+                Box(modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+            }
+        }else {
+            items(recipes) { item ->
                 CardRecipe(item, navController)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
 }
 /*
 @Composable

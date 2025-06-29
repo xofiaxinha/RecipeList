@@ -40,6 +40,7 @@ import com.example.recipelist.ui.screens.HomeScreen
 import com.example.recipelist.ui.screens.ItemDetails
 import com.example.recipelist.ui.screens.ShoppingListScreen
 import com.example.recipelist.ui.theme.RecipeListTheme
+import com.example.recipelist.viewmodel.HomeViewModel
 
 import kotlinx.coroutines.launch
 
@@ -57,8 +58,8 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(){
-    val receitasMockadas = MockDataProvider.sampleRecipes
+fun MainScreen(homeViewModel: HomeViewModel = HomeViewModel()){
+    //val receitasMockadas = MockDataProvider.sampleRecipes
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -81,10 +82,10 @@ fun MainScreen(){
                     startDestination = "home",
                     modifier = Modifier.padding((innerPaddinng))
                 ) {
-                    composable("home") { HomeScreen(receitasMockadas, navController, context = LocalContext.current) }
+                    composable("home") { HomeScreen(homeViewModel, navController) }
                     composable("itemDetails/{id}") { backStackEntry ->
                         val recipeId = backStackEntry.arguments?.getString("id")
-                        ItemDetails(itemList = receitasMockadas, itemId = recipeId?.toInt() ?: 0)
+                        ItemDetails(homeViewModel, itemId = recipeId?.toInt() ?: 0)
                     }
                     composable("lista") { ShoppingListScreen() }
                 }

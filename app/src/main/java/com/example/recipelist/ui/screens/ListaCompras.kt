@@ -12,11 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.ui.components.AddItemForm
 import com.example.recipelist.ui.components.ShoppingItemList
 import com.example.recipelist.viewmodel.ShoppingListViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
@@ -52,7 +54,15 @@ fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
         Spacer(modifier = Modifier.height(24.dp))
         ShoppingItemList(
             items = shoppingList,
-            onRemoveItem = { shoppingListViewModel.removeItem(it) }
+            onRemoveItem = {
+                shoppingListViewModel.removeItem(it)
+            }
         )
     }
+}
+
+@Preview
+@Composable
+fun ShoppingListScreenPreview(shoppingListViewModel: ShoppingListViewModel = ShoppingListViewModel()) {
+    ShoppingListScreen(shoppingListViewModel)
 }

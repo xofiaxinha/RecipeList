@@ -84,9 +84,9 @@ fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
                 ) {
                     //onClick = {navController.navigate("itemDetails/${recipe.id}")}) {
                     Text(
-                        text = "ver receita",
-                        style = MaterialTheme.typography.titleSmall
-
+                        text = "Ver receita",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White
                     )
                 }
             }

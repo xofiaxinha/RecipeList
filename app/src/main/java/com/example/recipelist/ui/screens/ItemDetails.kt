@@ -2,119 +2,135 @@ package com.example.recipelist.ui.screens
 
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.recipelist.R
-import com.example.recipelist.data.model.Ingredient
-import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.utils.NotificationManager
-import com.example.recipelist.viewmodel.HomeViewModel
+import androidx.compose.runtime.getValue
+import com.example.recipelist.ui.components.IngredientList
+import com.example.recipelist.ui.components.RecipeDetailHeader
+import com.example.recipelist.ui.components.ServingsControl
+import com.example.recipelist.viewmodel.DetailViewModel
+import com.example.recipelist.viewmodel.SettingsViewModel
+import com.example.recipelist.viewmodel.ShoppingListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 @RequiresPermission("android.permission.POST_NOTIFICATIONS")
-fun ItemDetails(homeViewModel: HomeViewModel, itemId: Int, context: Context = LocalContext.current){
-    val item = homeViewModel.recipes.find { it.id == itemId }
-    var selectedIngredients = emptyList<Ingredient>()
+fun ItemDetails(
+    detailViewModel: DetailViewModel,
+    shoppingListViewModel: ShoppingListViewModel,
+    settingsViewModel: SettingsViewModel,
+    itemId: Int,
+    onNavigateBack: () -> Unit,
+    context: Context = LocalContext.current
+) {
+    LaunchedEffect(itemId) {
+        detailViewModel.loadRecipe(itemId)
+    }
+
+    val recipe by detailViewModel.recipe.collectAsState()
+    val adjustedIngredients by detailViewModel.adjustedIngredients.collectAsState()
+    val selectedServings by detailViewModel.selectedServings.collectAsState()
+    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+
+    val selectedIngredients by detailViewModel.selectedIngredients.collectAsState()
+
     val notificationManager = NotificationManager()
     notificationManager.createNotificationChannel(context)
-    item?.let {
-        Row(modifier = Modifier.padding(16.dp)) {
+
+    recipe?.let { currentRecipe ->
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.padding(32.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = it.imageRes),
-                    contentDescription = it.name,
-                    modifier = Modifier.size(300.dp).clip(CircleShape)
-                        .align(Alignment.CenterHorizontally),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
+                RecipeDetailHeader(recipe = currentRecipe)
+                Spacer(modifier = Modifier.height(24.dp))
+                ServingsControl(
+                    servings = selectedServings,
+                    onIncrease = { detailViewModel.increaseServings() },
+                    onDecrease = { detailViewModel.decreaseServings() }
+                
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = it.name,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = it.description,
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn {
-                    items(it.ingredients) { ingrediente ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedIngredients.contains(ingrediente),
-                                onCheckedChange = { isChecked ->
-                                    if (isChecked) {
-                                        selectedIngredients = selectedIngredients - ingrediente
-                                    } else {
-                                        selectedIngredients = selectedIngredients + ingrediente
-                                    }
-                                }
-                            )
-                            Text(
-                                text = ingrediente.name,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { notificationManager.sendNotification(context, title = "Ingredientes adicionados com sucesso!", message = "Vamos fazer compras?") },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(
-                        text = if (selectedIngredients.isEmpty() || selectedIngredients.size == it.ingredients.size) "Adicionar todos os ingredientes" else "Adicionar ingredientes",
-                        style = MaterialTheme.typography.titleSmall
+                Box(modifier = Modifier.weight(1f)) {
+                    IngredientList(
+                        ingredients = adjustedIngredients,
+                        selectedIngredients = selectedIngredients,
+                        onIngredientCheckedChange = { detailViewModel.toggleIngredientSelection(it) },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        detailViewModel.addToShoppingList(shoppingListViewModel)
+                        if (notificationsEnabled) {
+                            notificationManager.sendNotification(
+                                context,
+                                title = "Ingredientes adicionados com sucesso!",
+                                message = "Vamos fazer compras?"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (selectedIngredients.isEmpty()) "Adicionar Todos à Lista" else "Adicionar Selecionados")
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "Favorito",
+                    tint = Color(0xFFFFC107)
+                )
+                Switch(
+                    checked = currentRecipe.isFavorite,
+                    onCheckedChange = { detailViewModel.toggleFavorite() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color(0xFFC9A800),
+                        checkedTrackColor = Color(0xFFFFC107).copy(alpha = 0.5f)
+                    )
+                )
             }
         }
-    }?: run {
-        Text(
-            text = "Receita não encontrada"
-        )
+    } ?: run {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
     }
-    }
+}
 
 /*
 @Preview

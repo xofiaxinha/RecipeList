@@ -19,7 +19,7 @@ object MockDataProvider {
                                     ),
                             defaultServings = 4,
                             isFavorite = false,
-                            imageRes = R.drawable.ic_launcher_background,
+                            imageRes = R.drawable.panquecas,
                             description = "Panqueca"
                     ),
                     Recipe(
@@ -35,7 +35,7 @@ object MockDataProvider {
                                     ),
                             defaultServings = 8,
                             isFavorite = false,
-                            imageRes = R.drawable.ic_launcher_background,
+                            imageRes = R.drawable.bolo_de_cenoura,
                             description = "Bolo"
                     ),
                     Recipe(
@@ -51,7 +51,7 @@ object MockDataProvider {
                                     ),
                             defaultServings = 6,
                             isFavorite = false,
-                            imageRes = R.drawable.ic_launcher_background,
+                            imageRes = R.drawable.arroz,
                             description = "Arroz"
                     )
             )

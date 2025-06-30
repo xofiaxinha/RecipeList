@@ -1,55 +1,63 @@
 package com.example.recipelist.ui.screens
 
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import com.example.recipelist.data.model.Recipe
-import com.example.recipelist.data.util.MockDataProvider
-import com.example.recipelist.ui.components.CardRecipe
+import com.example.recipelist.viewmodel.HomeViewModel
+import androidx. compose.runtime.getValue
+import androidx.compose.foundation.layout.Column
+import com.example.recipelist.ui.components.RecipeList
+import com.example.recipelist.ui.components.SearchAndFilterBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(recipes: List<Recipe>, navController: NavHostController){
-    LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(16.dp)
-        ) {
-            items (recipes) { item ->
-                CardRecipe(item, navController)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-}
+fun HomeScreen(homeViewModel: HomeViewModel, onRecipeClick: (Int) -> Unit) {
+    val isLoading by homeViewModel::isLoading
+    val searchQuery by homeViewModel.searchQuery.collectAsState()
+    val recipes by homeViewModel.filteredRecipes.collectAsState()
+    val showOnlyFavorites by homeViewModel.showOnlyFavorites.collectAsState()
 
+    LaunchedEffect(Unit) {
+        homeViewModel.fetchRecipes()
+    }
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+
+        SearchAndFilterBar(
+            searchQuery = searchQuery,
+            onSearchQueryChanged = { homeViewModel.onSearchQueryChanged(it) },
+            showOnlyFavorites = showOnlyFavorites,
+            onFavoritesFilterChanged = { homeViewModel.onFavoritesFilterChanged(it) }
+        )
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            RecipeList(
+                recipes = recipes,
+                onRecipeClick = onRecipeClick,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+    }
+}
+/*
 @Composable
 @Preview
 fun HomeScreenPreview(){
     var a = MockDataProvider
     HomeScreen(a.sampleRecipes)
-}
+}*/

@@ -1,112 +1,153 @@
 package com.example.recipelist.ui.screens
 
-import androidx.compose.foundation.Image
+import android.content.Context
+import androidx.annotation.RequiresPermission
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.recipelist.R
-import com.example.recipelist.data.model.Ingredient
-import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.utils.NotificationManager
+import androidx.compose.runtime.getValue
+import com.example.recipelist.ui.components.IngredientList
+import com.example.recipelist.ui.components.RecipeDetailHeader
+import com.example.recipelist.ui.components.ServingsControl
+import com.example.recipelist.viewmodel.DetailViewModel
+import com.example.recipelist.viewmodel.SettingsViewModel
+import com.example.recipelist.viewmodel.ShoppingListViewModel
+import kotlin.getValue
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun ItemDetails(itemList: List<Recipe>, itemId: Int){
-    val item = itemList.find { it.id == itemId }
-    var selectedIngredients = emptyList<Ingredient>()
-    item?.let {
-        Row(modifier = Modifier.padding(16.dp)) {
-            Column(
-                modifier = Modifier.padding(32.dp).fillMaxWidth(),
+@RequiresPermission("android.permission.POST_NOTIFICATIONS")
+fun ItemDetails(
+    detailViewModel: DetailViewModel,
+    shoppingListViewModel: ShoppingListViewModel,
+    settingsViewModel: SettingsViewModel,
+    itemId: Int,
+    onNavigateBack: () -> Unit,
+    context: Context = LocalContext.current
+) {
+    LaunchedEffect(itemId) {
+        detailViewModel.loadRecipe(itemId)
+    }
+
+    val isLoading by detailViewModel::isLoading
+
+    val recipe by detailViewModel.recipe.collectAsState()
+    val adjustedIngredients by detailViewModel.adjustedIngredients.collectAsState()
+    val selectedServings by detailViewModel.selectedServings.collectAsState()
+    val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+
+    val selectedIngredients by detailViewModel.selectedIngredients.collectAsState()
+
+    val notificationManager = NotificationManager()
+    notificationManager.createNotificationChannel(context)
+
+    recipe?.let { currentRecipe ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = item.imageRes),
-                    contentDescription = item.name,
-                    modifier = Modifier.size(300.dp).clip(CircleShape)
-                        .align(Alignment.CenterHorizontally),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn {
-                    items(item.ingredients) { ingrediente ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedIngredients.contains(ingrediente),
-                                onCheckedChange = { isChecked ->
-                                    if (isChecked) {
-                                        selectedIngredients = selectedIngredients + ingrediente
-                                    } else {
-                                        selectedIngredients = selectedIngredients - ingrediente
-                                    }
-                                }
-                            )
-                            Text(
-                                text = ingrediente.name,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {},
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(
-                        text = if (selectedIngredients.isEmpty() || selectedIngredients.size == item.ingredients.size) "Adicionar todos os ingredientes" else "Adicionar ingredientes",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
+                CircularProgressIndicator()
             }
         }
-    }?: run {
-        Text(
-            text = "Receita não encontrada"
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                RecipeDetailHeader(recipe = currentRecipe)
+                Spacer(modifier = Modifier.height(24.dp))
+                ServingsControl(
+                    servings = selectedServings,
+                    onIncrease = { detailViewModel.increaseServings() },
+                    onDecrease = { detailViewModel.decreaseServings() }
+                
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(modifier = Modifier.weight(1f)) {
+                    IngredientList(
+                        ingredients = adjustedIngredients,
+                        selectedIngredients = selectedIngredients,
+                        onIngredientCheckedChange = { detailViewModel.toggleIngredientSelection(it) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        detailViewModel.addToShoppingList(shoppingListViewModel)
+                        if (notificationsEnabled) {
+                            notificationManager.sendNotification(
+                                context,
+                                title = "Ingredientes adicionados com sucesso!",
+                                message = "Vamos fazer compras?"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(if (selectedIngredients.isEmpty()) "Adicionar Todos à Lista" else "Adicionar Selecionados")
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "Favorito",
+                    tint = Color(0xFFFFC107)
+                )
+                Switch(
+                    checked = currentRecipe.isFavorite,
+                    onCheckedChange = { detailViewModel.toggleFavorite() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color(0xFFC9A800),
+                        checkedTrackColor = Color(0xFFFFC107).copy(alpha = 0.5f)
+                    )
+                )
+            }
+        }
+    } ?: run {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
     }
-    }
+}
 
 /*
 @Preview

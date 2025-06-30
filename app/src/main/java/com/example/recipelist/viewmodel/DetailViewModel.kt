@@ -1,7 +1,7 @@
-// pacote onde o arquivo está localizado
+
 package com.example.recipelist.viewmodel
 
-// imports necessários
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Ingredient
@@ -11,21 +11,21 @@ import com.example.recipelist.data.repository.RecipeRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-// viewmodel para a tela de detalhes da receita
 class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepository()) :
     ViewModel() {
 
-    // estado da receita atual
-    val _recipe = MutableStateFlow<Recipe?>(null)
+    private val _recipe = MutableStateFlow<Recipe?>(null)
     val recipe: StateFlow<Recipe?> = _recipe
 
-    // estado das porções selecionadas
-    val _selectedServings = MutableStateFlow(1)
+    private val _selectedServings = MutableStateFlow(1)
     val selectedServings: StateFlow<Int> = _selectedServings
 
-    // ingredientes ajustados de acordo com as porções
+    private val _selectedIngredients = MutableStateFlow<Set<Ingredient>>(emptySet())
+    val selectedIngredients: StateFlow<Set<Ingredient>> = _selectedIngredients
+
     val adjustedIngredients: StateFlow<List<Ingredient>> =
         combine(_recipe, _selectedServings) { recipe, servings ->
+            _selectedIngredients.value = emptySet()
             recipe?.ingredients?.map { ingredient ->
                 val factor =
                     servings.toDouble() /
@@ -40,35 +40,46 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
                 initialValue = emptyList()
             )
 
-    // carrega uma receita pelo id
     fun loadRecipe(id: Int) {
         viewModelScope.launch {
             repository.getRecipeById(id)?.let { r ->
                 _recipe.value = r
                 _selectedServings.value = r.defaultServings
+                _selectedIngredients.value = emptySet()
             }
         }
     }
 
-    // aumenta a quantidade de porções
+    fun toggleIngredientSelection(ingredient: Ingredient) {
+        val currentSelection = _selectedIngredients.value.toMutableSet()
+        if (currentSelection.contains(ingredient)) {
+            currentSelection.remove(ingredient)
+        } else {
+            currentSelection.add(ingredient)
+        }
+        _selectedIngredients.value = currentSelection
+    }
+
     fun increaseServings() {
         _selectedServings.value = _selectedServings.value + 1
     }
 
-    // diminui a quantidade de porções
     fun decreaseServings() {
         if (_selectedServings.value > 1) {
             _selectedServings.value -= 1
         }
     }
 
-    // alterna o estado de favorito
     fun toggleFavorite() {
         _recipe.value = _recipe.value?.copy(isFavorite = _recipe.value?.isFavorite?.not() ?: false)
     }
 
-    // adiciona ingredientes à lista de compras
     fun addToShoppingList(shoppingListViewModel: ShoppingListViewModel) {
-        shoppingListViewModel.addItems(adjustedIngredients.value)
+        val ingredientsToAdd = if (_selectedIngredients.value.isEmpty()) {
+            adjustedIngredients.value
+        } else {
+            _selectedIngredients.value.toList()
+        }
+        shoppingListViewModel.addItems(ingredientsToAdd)
     }
 }

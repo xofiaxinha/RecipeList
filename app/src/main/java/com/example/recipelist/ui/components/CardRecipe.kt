@@ -177,24 +177,25 @@ fun IngredientList(
             }
         }
     }
-
-@Preview
-@Composable
-fun CardRecipePreview(){
-    val recipe = Recipe(
-        id = 1,
-        name = "Teste",
-        defaultServings = 1,
-        imageRes = R.drawable.ic_launcher_background,
-        description = "Uma receita massa",
-        ingredients =
-            listOf(
-                Ingredient("Farinha de trigo", 200.0f, "g"),
-                Ingredient("Leite", 250.0f, "ml"),
-                Ingredient("Ovo", 2.0f, "un"),
-                Ingredient("Sal", 1.0f, "pitada")
-            ),
-        isFavorite = false
-    )
-    CardRecipe(recipe, navController = rememberNavController())
 }
+
+//@Preview
+//@Composable
+//fun CardRecipePreview(){
+//    val recipe = Recipe(
+//        id = 1,
+//        name = "Teste",
+//        defaultServings = 1,
+//        imageRes = R.drawable.ic_launcher_background,
+//        description = "Uma receita massa",
+//        ingredients =
+//            listOf(
+//                Ingredient("Farinha de trigo", 200.0f, "g"),
+//                Ingredient("Leite", 250.0f, "ml"),
+//                Ingredient("Ovo", 2.0f, "un"),
+//                Ingredient("Sal", 1.0f, "pitada")
+//            ),
+//        isFavorite = false
+//    )
+//    CardRecipe(recipe, navController = rememberNavController())
+//}

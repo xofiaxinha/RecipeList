@@ -34,6 +34,7 @@ import com.example.recipelist.ui.components.ServingsControl
 import com.example.recipelist.viewmodel.DetailViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
+import kotlin.getValue
 
 
 @Composable
@@ -50,6 +51,8 @@ fun ItemDetails(
         detailViewModel.loadRecipe(itemId)
     }
 
+    val isLoading by detailViewModel::isLoading
+
     val recipe by detailViewModel.recipe.collectAsState()
     val adjustedIngredients by detailViewModel.adjustedIngredients.collectAsState()
     val selectedServings by detailViewModel.selectedServings.collectAsState()
@@ -61,6 +64,14 @@ fun ItemDetails(
     notificationManager.createNotificationChannel(context)
 
     recipe?.let { currentRecipe ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier

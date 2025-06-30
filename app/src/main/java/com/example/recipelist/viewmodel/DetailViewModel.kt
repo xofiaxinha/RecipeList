@@ -2,12 +2,16 @@
 package com.example.recipelist.viewmodel
 
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.data.repository.MockRecipeRepository
 import com.example.recipelist.data.repository.RecipeRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -22,6 +26,9 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
 
     private val _selectedIngredients = MutableStateFlow<Set<Ingredient>>(emptySet())
     val selectedIngredients: StateFlow<Set<Ingredient>> = _selectedIngredients
+
+    var isLoading by mutableStateOf(false)
+        private set
 
     val adjustedIngredients: StateFlow<List<Ingredient>> =
         combine(_recipe, _selectedServings) { recipe, servings ->
@@ -42,11 +49,14 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
 
     fun loadRecipe(id: Int) {
         viewModelScope.launch {
+            isLoading = true
+            delay(1500)
             repository.getRecipeById(id)?.let { r ->
                 _recipe.value = r
                 _selectedServings.value = r.defaultServings
                 _selectedIngredients.value = emptySet()
             }
+            isLoading = false
         }
     }
 

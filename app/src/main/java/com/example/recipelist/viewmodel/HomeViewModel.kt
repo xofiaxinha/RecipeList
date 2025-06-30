@@ -13,13 +13,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-
 class HomeViewModel : ViewModel() {
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     private val _showOnlyFavorites = MutableStateFlow(false)
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
-
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
@@ -27,7 +25,6 @@ class HomeViewModel : ViewModel() {
         private set
     val allRecipes: StateFlow<List<Recipe>> = _recipes
     private var recipesFetched = false
-
 
     val filteredRecipes: StateFlow<List<Recipe>> =
         combine(_recipes, _searchQuery, _showOnlyFavorites) { recipes, query, onlyFavorites ->
@@ -37,7 +34,6 @@ class HomeViewModel : ViewModel() {
             if (onlyFavorites) {
                 filteredList = filteredList.filter { it.isFavorite }
             }
-
 
             if (query.isNotBlank()) {
                 filteredList = filteredList.filter { it.name.contains(query, ignoreCase = true) }

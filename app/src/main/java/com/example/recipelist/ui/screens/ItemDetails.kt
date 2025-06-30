@@ -35,6 +35,7 @@ import com.example.recipelist.viewmodel.DetailViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
 
+
 @Composable
 @RequiresPermission("android.permission.POST_NOTIFICATIONS")
 fun ItemDetails(
@@ -73,9 +74,9 @@ fun ItemDetails(
                     servings = selectedServings,
                     onIncrease = { detailViewModel.increaseServings() },
                     onDecrease = { detailViewModel.decreaseServings() }
+                
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Box(modifier = Modifier.weight(1f)) {
                     IngredientList(
                         ingredients = adjustedIngredients,

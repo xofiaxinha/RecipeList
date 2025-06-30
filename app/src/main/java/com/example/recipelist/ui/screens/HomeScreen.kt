@@ -54,3 +54,10 @@ fun HomeScreen(homeViewModel: HomeViewModel, onRecipeClick: (Int) -> Unit) {
         }
     }
 }
+/*
+@Composable
+@Preview
+fun HomeScreenPreview(){
+    var a = MockDataProvider
+    HomeScreen(a.sampleRecipes)
+}*/

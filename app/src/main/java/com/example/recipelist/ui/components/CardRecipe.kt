@@ -2,6 +2,7 @@ package com.example.recipelist.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,9 +33,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.remember
 
 @Composable
 fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
@@ -79,8 +84,9 @@ fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
                     onClick = { onRecipeClick(recipe.id) }
                 ) {
                     Text(
-                        text = "ver receita",
-                        style = MaterialTheme.typography.titleSmall
+                        text = "Ver receita",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White
                     )
                 }
             }
@@ -172,3 +178,24 @@ fun IngredientList(
         }
     }
 }
+
+//@Preview
+//@Composable
+//fun CardRecipePreview(){
+//    val recipe = Recipe(
+//        id = 1,
+//        name = "Teste",
+//        defaultServings = 1,
+//        imageRes = R.drawable.ic_launcher_background,
+//        description = "Uma receita massa",
+//        ingredients =
+//            listOf(
+//                Ingredient("Farinha de trigo", 200.0f, "g"),
+//                Ingredient("Leite", 250.0f, "ml"),
+//                Ingredient("Ovo", 2.0f, "un"),
+//                Ingredient("Sal", 1.0f, "pitada")
+//            ),
+//        isFavorite = false
+//    )
+//    CardRecipe(recipe, navController = rememberNavController())
+//}

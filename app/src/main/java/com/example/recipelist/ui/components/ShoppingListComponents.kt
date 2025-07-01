@@ -60,7 +60,7 @@ fun AddItemForm(
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = onAddItemClick,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.End),
         ) {
             Text("Adicionar")
         }
@@ -98,7 +98,7 @@ fun ShoppingItemList(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remover item",
-                                    tint = Color.Red
+                                    tint = MaterialTheme.colorScheme.error
                                 )
                             }
                         }

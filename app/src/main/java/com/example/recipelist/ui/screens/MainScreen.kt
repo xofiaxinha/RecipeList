@@ -34,7 +34,8 @@ fun MainScreen(settingsViewModel: SettingsViewModel) {
         drawerContent = {
             DrawerContent(
                 navController = navController,
-                settingsViewModel = settingsViewModel
+                settingsViewModel = settingsViewModel,
+                drawerState = drawerState
             )
         }
     ) {

@@ -1,5 +1,6 @@
 package com.example.recipelist.ui.screens
 
+import android.R.attr.onClick
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
@@ -10,14 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,6 +40,8 @@ import com.example.recipelist.ui.components.ServingsControl
 import com.example.recipelist.viewmodel.DetailViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
+import kotlin.getValue
+
 
 @Composable
 @RequiresPermission("android.permission.POST_NOTIFICATIONS")
@@ -49,84 +57,90 @@ fun ItemDetails(
         detailViewModel.loadRecipe(itemId)
     }
 
+
+    val isLoading by detailViewModel.isLoading.collectAsState()
     val recipe by detailViewModel.recipe.collectAsState()
     val adjustedIngredients by detailViewModel.adjustedIngredients.collectAsState()
     val selectedServings by detailViewModel.selectedServings.collectAsState()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
-
     val selectedIngredients by detailViewModel.selectedIngredients.collectAsState()
 
     val notificationManager = NotificationManager()
     notificationManager.createNotificationChannel(context)
 
-    recipe?.let { currentRecipe ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                RecipeDetailHeader(recipe = currentRecipe)
-                Spacer(modifier = Modifier.height(24.dp))
-                ServingsControl(
-                    servings = selectedServings,
-                    onIncrease = { detailViewModel.increaseServings() },
-                    onDecrease = { detailViewModel.decreaseServings() }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
 
-                Box(modifier = Modifier.weight(1f)) {
-                    IngredientList(
-                        ingredients = adjustedIngredients,
-                        selectedIngredients = selectedIngredients,
-                        onIngredientCheckedChange = { detailViewModel.toggleIngredientSelection(it) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        detailViewModel.addToShoppingList(shoppingListViewModel)
-                        if (notificationsEnabled) {
-                            notificationManager.sendNotification(
-                                context,
-                                title = "Ingredientes adicionados com sucesso!",
-                                message = "Vamos fazer compras?"
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(if (selectedIngredients.isEmpty()) "Adicionar Todos à Lista" else "Adicionar Selecionados")
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = "Favorito",
-                    tint = Color(0xFFFFC107)
-                )
-                Switch(
-                    checked = currentRecipe.isFavorite,
-                    onCheckedChange = { detailViewModel.toggleFavorite() },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color(0xFFC9A800),
-                        checkedTrackColor = Color(0xFFFFC107).copy(alpha = 0.5f)
-                    )
-                )
-            }
-        }
-    } ?: run {
+    if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
+        }
+    } else {
+        recipe?.let { currentRecipe ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    RecipeDetailHeader(recipe = currentRecipe)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    ServingsControl(
+                        servings = selectedServings,
+                        onIncrease = { detailViewModel.increaseServings() },
+                        onDecrease = { detailViewModel.decreaseServings() }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(modifier = Modifier.weight(1f)) {
+                        IngredientList(
+                            ingredients = adjustedIngredients,
+                            selectedIngredients = selectedIngredients,
+                            onIngredientCheckedChange = { detailViewModel.toggleIngredientSelection(it) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            detailViewModel.addToShoppingList(shoppingListViewModel)
+                            if (notificationsEnabled) {
+                                notificationManager.sendNotification(
+                                    context,
+                                    title = "Ingredientes adicionados com sucesso!",
+                                    message = "Vamos fazer compras?"
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (selectedIngredients.isEmpty()) "Adicionar Todos à Lista" else "Adicionar Selecionados")
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { detailViewModel.toggleFavorite() }) {
+                        val isFavorite = currentRecipe.isFavorite
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                            contentDescription = if (isFavorite) "Remover dos Favoritos" else "Adicionar aos Favoritos",
+                            tint = if (isFavorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+            }
+        } ?: run {
+
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Receita não encontrada.")
+            }
         }
     }
 }

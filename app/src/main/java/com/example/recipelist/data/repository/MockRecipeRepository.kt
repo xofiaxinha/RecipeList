@@ -3,25 +3,40 @@ package com.example.recipelist.data.repository
 
 // importa a classe Recipe
 import com.example.recipelist.data.model.Recipe
-// importa os dados mock
 import com.example.recipelist.data.util.MockDataProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-// classe que simula um repositório de receitas
-class MockRecipeRepository : RecipeRepository {
-    // lista de receitas mock
-    private val recipes = MockDataProvider.sampleRecipes
+object MockRecipeRepository : RecipeRepository {
 
-    // retorna todas as receitas
-    override fun getAllRecipes(): List<Recipe> = recipes
 
-    // busca uma receita pelo id
-    override fun getRecipeById(id: Int): Recipe? = recipes.find { it.id == id }
+    private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
+    private val recipes = _recipes.asStateFlow()
 
-    // busca uma receita pelo nome
-    override fun getRecipeByName(name: String): Recipe? =
-        recipes.find { it.name.equals(name, ignoreCase = true) }
+    init {
 
-    // retorna apenas as receitas favoritas
-    override fun getFavoriteRecipes(): List<Recipe> =
-        recipes.filter { it.isFavorite }
+        _recipes.value = MockDataProvider.sampleRecipes
+    }
+
+    override fun getAllRecipes(): MutableStateFlow<List<Recipe>> {
+        return _recipes
+    }
+
+    override fun getRecipeById(id: Int): Recipe? {
+        return recipes.value.find { it.id == id }
+    }
+
+
+    override fun updateRecipe(updatedRecipe: Recipe) {
+        _recipes.update { currentList ->
+            currentList.map { recipe ->
+                if (recipe.id == updatedRecipe.id) {
+                    updatedRecipe
+                } else {
+                    recipe
+                }
+            }
+        }
+    }
 }

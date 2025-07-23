@@ -31,7 +31,7 @@ import com.example.recipelist.ui.theme.DarkMainRed
 import com.example.recipelist.ui.theme.MainRed
 
 @Composable
-fun LoginScreen(){
+fun CadastroScreen(){
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -46,10 +46,18 @@ fun LoginScreen(){
                 tint = DarkMainRed,
                 modifier = Modifier.size(50.dp)
             )
-            Text(text = "Login", color = MainRed, style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Cadastro", color = MainRed, style = MaterialTheme.typography.headlineMedium)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
+        )
         OutlinedTextField(
             value = "",
             onValueChange = {},
@@ -66,10 +74,16 @@ fun LoginScreen(){
             shape = RoundedCornerShape(8.dp),
             visualTransformation = PasswordVisualTransformation()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            label = { Text("Confirmar senha") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            visualTransformation = PasswordVisualTransformation()
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = {}){
-            Text("Entrar")
-        }
         Row (
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -81,7 +95,7 @@ fun LoginScreen(){
                 Text("Criar Conta")
             }
             TextButton(onClick = {}) {
-                Text("Esqueci minha senha", color = MainRed)
+                Text("Já tenho cadastro", color = MainRed)
             }
         }
     }
@@ -89,6 +103,6 @@ fun LoginScreen(){
 
 @Preview
 @Composable
-fun LoginPreview(){
-    LoginScreen()
+fun CadastroPreview(){
+    CadastroScreen()
 }

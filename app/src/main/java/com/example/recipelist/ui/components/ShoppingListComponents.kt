@@ -61,8 +61,9 @@ fun AddItemForm(
         Button(
             onClick = onAddItemClick,
             modifier = Modifier.align(Alignment.End),
+            colors = ButtonDefaults.buttonColors(Color(0xFFE63244))
         ) {
-            Text("Adicionar")
+            Text("Adicionar", color = Color.White)
         }
     }
 }
@@ -94,11 +95,13 @@ fun ShoppingItemList(
                                 Text(item.name, fontWeight = FontWeight.Bold)
                                 Text("${item.quantity} ${item.unit}")
                             }
-                            IconButton(onClick = { onRemoveItem(item) }) {
+                            IconButton(onClick = {
+                                onRemoveItem(item)
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remover item",
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = Color.Red
                                 )
                             }
                         }

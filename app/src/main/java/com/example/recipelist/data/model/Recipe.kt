@@ -1,16 +1,32 @@
-
 package com.example.recipelist.data.model
 
-import androidx.compose.runtime.Immutable
+import com.google.gson.annotations.SerializedName
 
 
-@Immutable
 data class Recipe(
+        @SerializedName("id")
         val id: Int,
+
+        @SerializedName("name")
         val name: String,
+
+        @SerializedName("ingredients")
         val ingredients: List<Ingredient>,
+
+        @SerializedName("defaultServings")
         val defaultServings: Int,
-        val isFavorite: Boolean,
-        val imageRes: Int,
-        val description: String,
+
+        @SerializedName("isFavorite")
+        var isFavorite: Boolean,
+
+        @SerializedName("imageUrl")
+        val imageUrl: String,
+
+        @SerializedName("description")
+        val description: String
 )
+
+enum class RecipeFilter {
+        ALL, // todas as receitas
+        FAVORITE // apenas favoritas
+}

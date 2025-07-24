@@ -12,18 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -35,26 +27,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.recipelist.viewmodel.SettingsViewModel
 import androidx. compose. runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.compose.currentBackStackEntryAsState
-import kotlinx.coroutines.launch
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerContent(
     navController: NavHostController,
-    settingsViewModel: SettingsViewModel,
-    drawerState: DrawerState
+    settingsViewModel: SettingsViewModel
 ) {
-    val scope = rememberCoroutineScope()
     val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
 
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    ModalDrawerSheet {
+    Surface(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(380.dp)
+            .padding(end = 20.dp),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -62,48 +49,52 @@ fun DrawerContent(
         ) {
             Text(
                 text = "MENU",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineSmall, // Um estilo um pouco maior
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.SmartDisplay, contentDescription = "Ícone de Telas")
+                Icon(
+                    imageVector = Icons.Outlined.SmartDisplay,
+                    contentDescription = "Ícone de Telas"
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("TELAS", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    text = "TELAS",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-
-            NavigationDrawerItem(
-                label = { Text("Receitas") },
-                selected = currentRoute == "home",
-                onClick = {
-                    navController.navigate("home")
-                    scope.launch { drawerState.close() }
-                },
-                icon = { Icon(Icons.Filled.Home, contentDescription = "Receitas") },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            Text(
+                text = "Lista de Compras",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate("lista") }
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp) // Adiciona um recuo
             )
-
-            NavigationDrawerItem(
-                label = { Text("Lista de Compras") },
-                selected = currentRoute == "lista",
-                onClick = {
-                    navController.navigate("lista")
-                    scope.launch { drawerState.close() }
-                },
-                icon = { Icon(Icons.Filled.ListAlt, contentDescription = "Lista de Compras") },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            Text(
+                text = "Receitas",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate("home") }
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp) // Adiciona um recuo
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Settings, contentDescription = "Ícone de Opções")
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = "Ícone de Opções"
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("OPÇÕES", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    text = "OPÇÕES",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -112,8 +103,14 @@ fun DrawerContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Modo Escuro", style = MaterialTheme.typography.bodyLarge)
-                Switch(checked = isDarkTheme, onCheckedChange = { settingsViewModel.toggleTheme() })
+                Text(
+                    text = "Modo Escuro",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Switch(
+                    checked = isDarkTheme,
+                    onCheckedChange = { settingsViewModel.toggleTheme() }
+                )
             }
 
             Row(
@@ -121,13 +118,20 @@ fun DrawerContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Notificações", style = MaterialTheme.typography.bodyLarge)
-                Switch(checked = notificationsEnabled, onCheckedChange = { settingsViewModel.toggleNotifications() })
+                Text(
+                    text = "Notificações",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Switch(
+                    checked = notificationsEnabled,
+                    onCheckedChange = { settingsViewModel.toggleNotifications() }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
             Text(
-                "Versão 0.0.0.1",
+                text = "Versão 0.0.0.1",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )

@@ -3,53 +3,40 @@ package com.example.recipelist.viewmodel
 
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.example.recipelist.data.repository.SettingsRepository
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 
-class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
+class SettingsViewModel : ViewModel() {
 
 
-    val isDarkTheme: StateFlow<Boolean> = repository.isDarkTheme
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+    val _isDarkTheme = MutableStateFlow(false)
+    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme
 
-    val notificationsEnabled: StateFlow<Boolean> = repository.areNotificationsEnabled
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true // Valor inicial
-        )
 
+    val _notificationsEnabled = MutableStateFlow(true)
+    val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled
 
     fun toggleTheme() {
-        viewModelScope.launch {
-            repository.setDarkTheme(!isDarkTheme.value)
-        }
+        _isDarkTheme.value = !_isDarkTheme.value
     }
+
+
+    fun setDarkTheme(enabled: Boolean) {
+        _isDarkTheme.value = enabled
+    }
+
 
     fun toggleNotifications() {
-        viewModelScope.launch {
-            repository.setNotificationsEnabled(!notificationsEnabled.value)
-        }
+        _notificationsEnabled.value = !_notificationsEnabled.value
     }
-}
 
+    fun setNotifications(enabled: Boolean) {
+        _notificationsEnabled.value = enabled
+    }
 
-class SettingsViewModelFactory(private val repository: SettingsRepository) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    fun resetPreferences() {
+        _isDarkTheme.value = false
+        _notificationsEnabled.value = true
     }
 }

@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +38,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import com.example.recipelist.R
 
 @Composable
 fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
@@ -55,13 +56,15 @@ fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Column {
-                Image(
-                    painter = painterResource(id = recipe.imageRes),
+                AsyncImage(
+                    model = recipe.imageUrl,
                     contentDescription = recipe.name,
                     modifier = Modifier
                         .size(110.dp)
                         .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    // Imagem que aparece enquanto a da internet carrega
+                    placeholder = painterResource(id = R.drawable.panquecas)
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -83,6 +86,7 @@ fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
                     modifier = Modifier.align(Alignment.End),
                     onClick = { onRecipeClick(recipe.id) }
                 ) {
+
                     Text(
                         text = "Ver receita",
                         style = MaterialTheme.typography.titleSmall,
@@ -97,13 +101,14 @@ fun CardRecipe(recipe: Recipe, onRecipeClick: (Int) -> Unit) {
 @Composable
 fun RecipeDetailHeader(recipe: Recipe) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter = painterResource(id = recipe.imageRes),
+        AsyncImage(
+            model = recipe.imageUrl,
             contentDescription = recipe.name,
             modifier = Modifier
                 .size(300.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop,
+            placeholder = painterResource(id = R.drawable.panquecas)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

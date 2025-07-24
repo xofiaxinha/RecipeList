@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "198686439964",
+    "project_id": "recipelist-20c23",
+    "storage_bucket": "recipelist-20c23.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198686439964:android:1c3ad1c7940b6c4afe7dd9",
+        "android_client_info": {
+          "package_name": "com.example.recipelist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2Fv2ALzyhYCluCXjkfdoD4j5_e2RdxpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

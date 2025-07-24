@@ -15,14 +15,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepository) :
-    ViewModel() {
+class DetailViewModel(private val repository: RecipeRepository) : ViewModel() {
 
     private val _recipe = MutableStateFlow<Recipe?>(null)
     val recipe: StateFlow<Recipe?> = _recipe
-
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _selectedServings = MutableStateFlow(1)
     val selectedServings: StateFlow<Int> = _selectedServings
@@ -30,8 +26,12 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
     private val _selectedIngredients = MutableStateFlow<Set<Ingredient>>(emptySet())
     val selectedIngredients: StateFlow<Set<Ingredient>> = _selectedIngredients
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     val adjustedIngredients: StateFlow<List<Ingredient>> =
         combine(_recipe, _selectedServings) { recipe, servings ->
+            _selectedIngredients.value = emptySet()
             recipe?.ingredients?.map { ingredient ->
                 val factor =
                     servings.toDouble() /
@@ -42,25 +42,20 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
         }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
+                started = SharingStarted.Eagerly,
                 initialValue = emptyList()
             )
 
     fun loadRecipe(id: Int) {
         viewModelScope.launch {
-            _isLoading.value = true
-            delay(500)
-
-
-            val currentRecipe = repository.getRecipeById(id)
-
-            _recipe.value = currentRecipe
-            currentRecipe?.let {
-                _selectedServings.value = it.defaultServings
+            isLoading = true
+            val fetchedRecipe = repository.getRecipeById(id)
+            fetchedRecipe?.let { r ->
+                _recipe.value = r
+                _selectedServings.value = r.defaultServings
                 _selectedIngredients.value = emptySet()
             }
-
-            _isLoading.value = false
+            isLoading = false
         }
     }
 
@@ -74,14 +69,6 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
         _selectedIngredients.value = currentSelection
     }
 
-    fun toggleFavorite() {
-        _recipe.value?.let { currentRecipe ->
-            val updatedRecipe = currentRecipe.copy(isFavorite = !currentRecipe.isFavorite)
-            repository.updateRecipe(updatedRecipe)
-            _recipe.value = updatedRecipe // Atualiza o estado local também
-        }
-    }
-
     fun increaseServings() {
         _selectedServings.value = _selectedServings.value + 1
     }
@@ -90,6 +77,10 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
         if (_selectedServings.value > 1) {
             _selectedServings.value -= 1
         }
+    }
+
+    fun toggleFavorite() {
+        _recipe.value = _recipe.value?.copy(isFavorite = _recipe.value?.isFavorite?.not() ?: false)
     }
 
     fun addToShoppingList(shoppingListViewModel: ShoppingListViewModel) {

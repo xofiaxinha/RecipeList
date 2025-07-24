@@ -65,10 +65,7 @@ fun RecipeList(
         }
     } else {
         LazyColumn(modifier = modifier) {
-            items(
-                items = recipes,
-                key = { recipe -> recipe.id }
-            ) { recipe ->
+            items(recipes) { recipe ->
                 Box(modifier = Modifier.padding(bottom = 8.dp)) {
                     CardRecipe(recipe = recipe, onRecipeClick = { onRecipeClick(recipe.id) })
                 }

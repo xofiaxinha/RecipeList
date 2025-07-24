@@ -1,5 +1,6 @@
 package com.example.recipelist.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,20 +27,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.recipelist.R
+import com.example.recipelist.data.repository.AuthRepository
 import com.example.recipelist.ui.theme.DarkMainRed
 import com.example.recipelist.ui.theme.MainRed
+import com.example.recipelist.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EsqueciSenha(){
+fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
     var email by remember { mutableStateOf("") }
     var isValid by remember { mutableStateOf(true) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -82,7 +88,19 @@ fun EsqueciSenha(){
         Spacer(modifier = Modifier.height(16.dp))
         // Botão de Recuperação
         Button (
-            onClick = {},
+            onClick = {
+                if(isValid){
+                    viewModel.resetPassword(email){success ->
+                        if (success){
+                            Toast.makeText(context, "Email de recuperação enviado! Verifique seu spam.", Toast.LENGTH_LONG).show()
+                            navController.navigate("login")
+                        }
+                        else{
+                            Toast.makeText(context, "Erro ao enviar email de recuperação", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -105,5 +123,5 @@ fun EsqueciSenha(){
 @Preview
 @Composable
 fun EsqueciSenhaPreview(){
-    EsqueciSenha()
+    EsqueciSenha(viewModel = AuthViewModel(repository = AuthRepository()), navController = NavController(LocalContext.current))
 }

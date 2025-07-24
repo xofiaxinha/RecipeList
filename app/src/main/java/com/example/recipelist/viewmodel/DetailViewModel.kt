@@ -15,8 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepository()) :
-    ViewModel() {
+class DetailViewModel(private val repository: RecipeRepository) : ViewModel() {
 
     private val _recipe = MutableStateFlow<Recipe?>(null)
     val recipe: StateFlow<Recipe?> = _recipe
@@ -50,8 +49,8 @@ class DetailViewModel(private val repository: RecipeRepository = MockRecipeRepos
     fun loadRecipe(id: Int) {
         viewModelScope.launch {
             isLoading = true
-            delay(1500)
-            repository.getRecipeById(id)?.let { r ->
+            val fetchedRecipe = repository.getRecipeById(id)
+            fetchedRecipe?.let { r ->
                 _recipe.value = r
                 _selectedServings.value = r.defaultServings
                 _selectedIngredients.value = emptySet()

@@ -1,19 +1,22 @@
 package com.example.recipelist.viewmodel
 
-
-import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.recipelist.data.repository.RecipeRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Recipe
-import com.example.recipelist.data.util.MockDataProvider
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
-class HomeViewModel : ViewModel() {
+
+class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
+
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     private val _showOnlyFavorites = MutableStateFlow(false)
@@ -59,11 +62,9 @@ class HomeViewModel : ViewModel() {
         if (!recipesFetched) {
             viewModelScope.launch {
                 isLoading = true
-                delay(1500)
-                _recipes.value = MockDataProvider.sampleRecipes
+                val fetchedRecipes = repository.getAllRecipes()
+                _recipes.value = fetchedRecipes
                 isLoading = false
-                recipesFetched = true
-                Log.d("HomeViewModel", "Receitas buscadas com sucesso.")
             }
         }
     }

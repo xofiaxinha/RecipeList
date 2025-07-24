@@ -19,15 +19,19 @@ import com.example.recipelist.viewmodel.HomeViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
 import com.example.recipelist.viewmodel.DetailViewModel
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.recipelist.data.repository.RemoteRecipeRepository
+import com.example.recipelist.viewmodel.HomeViewModelFactory
+import com.example.recipelist.viewmodel.DetailViewModelFactory
 
 @Composable
 fun MainScreen(settingsViewModel: SettingsViewModel, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    val homeViewModel: HomeViewModel = viewModel()
+    val homeViewModel: HomeViewModel = viewModel<HomeViewModel>(
+        factory = HomeViewModelFactory(RemoteRecipeRepository())
+    )
     val shoppingListViewModel: ShoppingListViewModel = viewModel()
 
     ModalNavigationDrawer(
@@ -74,7 +78,9 @@ fun MainScreen(settingsViewModel: SettingsViewModel, authViewModel: AuthViewMode
                 composable("itemDetails/{itemId}") { backStackEntry ->
                     val itemId = backStackEntry.arguments?.getString("itemId")?.toIntOrNull()
                     if (itemId != null) {
-                        val detailViewModel: DetailViewModel = viewModel()
+                        val detailViewModel: DetailViewModel = viewModel(
+                            factory = DetailViewModelFactory(RemoteRecipeRepository())
+                        )
                         ItemDetails(
                             detailViewModel = detailViewModel,
                             shoppingListViewModel = shoppingListViewModel,

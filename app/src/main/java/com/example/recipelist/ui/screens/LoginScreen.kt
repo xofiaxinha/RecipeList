@@ -147,13 +147,17 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ){
-            TextButton(onClick = {}, colors = ButtonDefaults.buttonColors(
+            TextButton(onClick = {
+                navController.navigate("register")
+            }, colors = ButtonDefaults.buttonColors(
                 containerColor = MainRed,
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )) {
                 Text("Criar Conta")
             }
-            TextButton(onClick = {}) {
+            TextButton(onClick = {
+                navController.navigate("resetPassword")
+            }) {
                 Text("Esqueci minha senha", color = MainRed)
             }
         }

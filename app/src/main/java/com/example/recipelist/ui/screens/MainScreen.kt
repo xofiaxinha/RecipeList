@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.recipelist.ui.components.DrawerContent
 import com.example.recipelist.ui.components.TopBar
+import com.example.recipelist.viewmodel.AuthViewModel
 import com.example.recipelist.viewmodel.HomeViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
@@ -21,7 +22,7 @@ import com.example.recipelist.viewmodel.DetailViewModel
 
 
 @Composable
-fun MainScreen(settingsViewModel: SettingsViewModel) {
+fun MainScreen(settingsViewModel: SettingsViewModel, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -48,9 +49,19 @@ fun MainScreen(settingsViewModel: SettingsViewModel) {
         ) { paddingValues ->
             NavHost(
                 navController = navController,
-                startDestination = "home",
+                startDestination = "login",
                 modifier = Modifier.padding(paddingValues)
             ) {
+                composable("login"){
+                    LoginScreen(viewModel = authViewModel, navController = navController)
+                }
+                composable("register"){
+                    CadastroScreen(viewModel = authViewModel, navController = navController)
+                }
+                composable("resetPassword") {
+                    EsqueciSenha(viewModel = authViewModel, navController = navController)
+                }
+
                 composable("home") {
                     HomeScreen(
                         homeViewModel = homeViewModel,

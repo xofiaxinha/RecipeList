@@ -1,5 +1,6 @@
 package com.example.recipelist.ui.screens
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -120,6 +121,7 @@ fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview
 @Composable
 fun EsqueciSenhaPreview(){

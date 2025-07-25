@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -84,10 +88,10 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
             Icon(
                 painter = painterResource(id = R.drawable.logo_cart),
                 contentDescription = "Logo",
-                tint = DarkMainRed,
+                tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.size(50.dp)
             )
-            Text(text = "Login", color = MainRed, style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Login", color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.headlineMedium)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -96,7 +100,7 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(8.dp),
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -110,6 +114,10 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
+                if(email.isEmpty() || password.isEmpty()){
+                    Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
                 viewModel.login(email, password){sucess ->
                     if (sucess){
                         navController.navigate("home")
@@ -119,8 +127,9 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp)){
-            Text("Entrar")
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MainRed)){
+            Text("Entrar", color = Color.White)
         }
         Button(
             onClick = {
@@ -129,16 +138,16 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(containerColor = MainRed)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.search),
                 contentDescription = "Google Login",
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
+                tint = Color.White
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Entrar com Google", fontSize = 18.sp)
+            Text("Entrar com Google", fontSize = 18.sp, color = Color.White)
         }
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -146,16 +155,21 @@ fun LoginScreen(viewModel: AuthViewModel, navController: NavController){
         ){
             TextButton(onClick = {
                 navController.navigate("register")
-            }, colors = ButtonDefaults.buttonColors(
-                containerColor = MainRed,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            )) {
-                Text("Criar Conta")
+            }) {
+                Text("Criar Conta", color = MainRed)
             }
             TextButton(onClick = {
                 navController.navigate("resetPassword")
             }) {
                 Text("Esqueci minha senha", color = MainRed)
+            }
+        }
+        if (viewModel.isLoading){
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ){
+                CircularProgressIndicator()
             }
         }
     }

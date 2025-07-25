@@ -1,6 +1,9 @@
 package com.example.recipelist.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.repository.AuthRepository
@@ -17,6 +20,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     var loginResult: ((Boolean) -> Unit)? = null
     var registerResult: ((Boolean) -> Unit)? = null
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     /**
      * Método para registrar um novo usuário utilizando email e senha.
      * Após a criação do usuário no Firebase Authentication, seus dados são armazenados no Firestore.
@@ -28,7 +34,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
      */
     fun register(email: String, password: String, name: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
+            isLoading = true
             val success = repository.registerUser(email, password, name)
+            isLoading = false
             onResult(success) // Retorna o resultado para a UI
         }
     }
@@ -43,7 +51,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
      */
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
+            isLoading = true
             val success = repository.loginUser(email, password)
+            isLoading = false
             onResult(success) // Notifica a UI com o resultado
         }
     }
@@ -84,7 +94,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
      */
     fun loginWithGoogle(idToken: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
+            isLoading = true
             val success = repository.loginWithGoogle(idToken)
+            isLoading = false
             onResult(success)
         }
     }

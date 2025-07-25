@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,7 +51,7 @@ fun DrawerContent(
             Text(
                 text = "MENU",
                 style = MaterialTheme.typography.headlineSmall, // Um estilo um pouco maior
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp),
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -61,7 +62,7 @@ fun DrawerContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "TELAS",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -93,7 +94,7 @@ fun DrawerContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "OPÇÕES",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

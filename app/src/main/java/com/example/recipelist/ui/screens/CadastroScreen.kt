@@ -2,6 +2,7 @@ package com.example.recipelist.ui.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -161,25 +163,43 @@ fun CadastroScreen(viewModel: AuthViewModel, navController: NavController){
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             TextButton(onClick = {
+                if (password.length < 6){
+                    Toast.makeText(context, "A senha deve ter no mínimo 6 caracteres", Toast.LENGTH_SHORT).show()
+                }
+                if (password.length > 16){
+                    Toast.makeText(context, "A senha deve ter no máximo 16 caracteres", Toast.LENGTH_SHORT).show()
+                }
+                if (email.isEmpty() || name.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()){
+                    Toast.makeText(context, "Preencha todos os campos", Toast.LENGTH_SHORT).show()
+                }
+
                 if (validEmail && eqPass){
                     viewModel.register(email, password, name){ success ->
                         if (success){
                             navController.navigate("login")
-                        }else {
+                        }else{
                             Toast.makeText(context, "Erro ao criar conta", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
-            }, colors = ButtonDefaults.buttonColors(
-                containerColor = MainRed,
-                contentColor = MaterialTheme.colorScheme.onTertiary
+            }, colors = ButtonDefaults.textButtonColors(
+                containerColor = DarkMainRed,
+                contentColor = Color.White
             )) {
-                Text("Criar Conta")
+                Text("Criar Conta", color = MainRed)
             }
             TextButton(onClick = {
                 navController.navigate("login")
             }) {
                 Text("Já tenho cadastro", color = MainRed)
+            }
+        }
+        if (viewModel.isLoading){
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Transparent),
+                contentAlignment = Alignment.Center
+            ){
+                CircularProgressIndicator()
             }
         }
     }

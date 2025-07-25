@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.data.repository.FavoritesRepository
-import com.example.recipelist.data.repository.MockRecipeRepository
 import com.example.recipelist.data.repository.RecipeRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -50,12 +49,17 @@ class DetailViewModel(private val repository: RecipeRepository, private val favo
     fun loadRecipe(id: Int) {
         viewModelScope.launch {
             isLoading = true
-            val fetchedRecipe = repository.getRecipeById(id)
-            fetchedRecipe?.let { r ->
-                _recipe.value = r
-                _selectedServings.value = r.defaultServings
+            val baseRecipe = repository.getRecipeById(id)
+
+            if (baseRecipe != null) {
+                val favoriteIds = favoritesRepository.getFavorites().first()
+                val isActuallyFavorite = favoriteIds.contains(baseRecipe.id)
+                val finalRecipe = baseRecipe.copy(isFavorite = isActuallyFavorite)
+                _recipe.value = finalRecipe
+                _selectedServings.value = finalRecipe.defaultServings
                 _selectedIngredients.value = emptySet()
-                _recipe.value?.isFavorite = favoritesRepository.isFavorite(r.id)
+            } else {
+                _recipe.value = null
             }
             isLoading = false
         }

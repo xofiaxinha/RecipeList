@@ -5,6 +5,7 @@ package com.example.recipelist.viewmodel
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.Calendar
 
 
 class SettingsViewModel : ViewModel() {
@@ -24,6 +25,12 @@ class SettingsViewModel : ViewModel() {
 
     fun setDarkTheme(enabled: Boolean) {
         _isDarkTheme.value = enabled
+    }
+    fun updateThemeBasedOnTime() {
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val shouldUseDarkTheme = currentHour >= 18 || currentHour < 6
+        _isDarkTheme.value = shouldUseDarkTheme
     }
 
 

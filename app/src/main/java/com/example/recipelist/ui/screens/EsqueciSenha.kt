@@ -2,46 +2,26 @@ package com.example.recipelist.ui.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.recipelist.R
 import com.example.recipelist.data.repository.AuthRepository
-import com.example.recipelist.ui.theme.DarkMainRed
+import com.example.recipelist.data.sync.SyncManager
 import com.example.recipelist.ui.theme.MainRed
 import com.example.recipelist.viewmodel.AuthViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
     var email by remember { mutableStateOf("") }
@@ -59,7 +39,7 @@ fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
             Icon(
                 painter = painterResource(id = R.drawable.logo_cart),
                 contentDescription = "Logo",
-                tint = DarkMainRed,
+                tint = MainRed,
                 modifier = Modifier.size(50.dp)
             )
             Text(text = "Recuperar Senha", color = MainRed, style = MaterialTheme.typography.headlineMedium)
@@ -87,7 +67,6 @@ fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // Botão de Recuperação
         Button (
             onClick = {
                 if(isValid){
@@ -114,8 +93,7 @@ fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
             Text("Enviar Email de Recuperação", fontSize = 16.sp)
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // Botão de Voltar
-        TextButton(onClick = {}) {
+        TextButton(onClick = { navController.popBackStack() }) {
             Text("Voltar", color = MainRed)
         }
     }
@@ -125,5 +103,33 @@ fun EsqueciSenha(viewModel: AuthViewModel, navController: NavController){
 @Preview
 @Composable
 fun EsqueciSenhaPreview(){
-    EsqueciSenha(viewModel = AuthViewModel(repository = AuthRepository()), navController = NavController(LocalContext.current))
+    val context = LocalContext.current
+    val dummySyncManager = SyncManager(
+        settingsRepository = com.example.recipelist.data.repository.SettingsRepository(com.example.recipelist.data.datastore.SettingsDataStore(context)),
+        favoritesRepository = com.example.recipelist.data.repository.FavoritesRepository(
+            favoriteDao = object : com.example.recipelist.data.local.FavoriteDao {
+                override fun getFavoriteIds(): kotlinx.coroutines.flow.Flow<List<Int>> = kotlinx.coroutines.flow.flowOf(emptyList())
+                override suspend fun addFavorite(favorite: com.example.recipelist.data.local.FavoriteEntity) {}
+                override suspend fun removeFavorite(recipeId: Int) {}
+                override suspend fun getFavorite(recipeId: Int): com.example.recipelist.data.local.FavoriteEntity? = null
+                override suspend fun clearAll() {}
+                override suspend fun insertAll(favorites: List<com.example.recipelist.data.local.FavoriteEntity>) {}
+                override suspend fun getUnsynced(): List<com.example.recipelist.data.local.FavoriteEntity> = emptyList()
+            },
+            firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        ),
+        shoppingListRepository = com.example.recipelist.data.repository.OfflineFirstShoppingListRepository(
+            shoppingListDao = object : com.example.recipelist.data.local.ShoppingListDao {
+                override fun getAllItems(): kotlinx.coroutines.flow.Flow<List<com.example.recipelist.data.local.ShoppingItemEntity>> = kotlinx.coroutines.flow.flowOf(emptyList())
+                override suspend fun insertItem(item: com.example.recipelist.data.local.ShoppingItemEntity) {}
+                override suspend fun deleteItem(itemId: String) {}
+                override suspend fun clearAll() {}
+                override suspend fun insertAll(items: List<com.example.recipelist.data.local.ShoppingItemEntity>) {}
+                override suspend fun getUnsynced(): List<com.example.recipelist.data.local.ShoppingItemEntity> = emptyList()
+            },
+            firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        )
+    )
+    val viewModel = AuthViewModel(repository = AuthRepository(), syncManager = dummySyncManager)
+    EsqueciSenha(viewModel = viewModel, navController = NavHostController(context = LocalContext.current))
 }

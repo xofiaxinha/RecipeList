@@ -2,40 +2,28 @@ package com.example.recipelist.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Ingredient
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.recipelist.data.repository.OfflineFirstShoppingListRepository
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.builtins.LongArraySerializer
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class ShoppingListViewModel : ViewModel() {
+class ShoppingListViewModel(
+    private val repository: OfflineFirstShoppingListRepository
+) : ViewModel() {
 
-    private val _shoppingItems = MutableStateFlow<List<Ingredient>>(emptyList())
-    val shoppingItems: StateFlow<List<Ingredient>> = _shoppingItems.asStateFlow()
-    private val firestore : FirebaseFirestore = FirebaseFirestore.getInstance()
+    val shoppingItems: StateFlow<List<Ingredient>> = repository.getShoppingList()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    fun ingredientToString(item: Ingredient): String{
-        val s = "${item.quantity} ${item.unit} ${item.name}"
-        return s
-    }
-    fun stringToIngredient(s: String): Ingredient{
-        val parts = s.split(" ")
-        val quantity = parts[0].toFloat()
-        val unit = parts[1]
-        val name = parts.subList(2, parts.size).joinToString(" ")
-        return Ingredient(name, quantity, unit)
-    }
-
-    fun addItems(newItems: List<Ingredient>) {
-        _shoppingItems.update { currentList ->
-            (currentList + newItems).groupBy { it.name to it.unit }.map { (_, items) ->
-                val totalQty = items.sumOf { it.quantity.toDouble() }.toFloat()
-                Ingredient(items.first().name, totalQty, items.first().unit)
-            }
+    fun addItem(item: Ingredient) {
+        viewModelScope.launch {
+            repository.addItem(item)
         }
         val user = FirebaseAuth.getInstance().currentUser
         for (item in newItems){
@@ -49,13 +37,19 @@ class ShoppingListViewModel : ViewModel() {
         }
     }
 
-    fun addItem(item: Ingredient) {
-        addItems(listOf(item))
-    }
+    fun addItems(newItems: List<Ingredient>) {
+        viewModelScope.launch {
+            val combinedItems = (shoppingItems.value + newItems)
+                .groupBy { it.name to it.unit }
+                .map { (_, items) ->
+                    Ingredient(
+                        name = items.first().name,
+                        quantity = items.sumOf { it.quantity.toDouble() }.toFloat(),
+                        unit = items.first().unit
+                    )
+                }
 
-    fun removeItem(item: Ingredient) {
-        _shoppingItems.update { currentList ->
-            currentList.filterNot { it.name == item.name && it.unit == item.unit }
+            combinedItems.forEach { repository.addItem(it) }
         }
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null){
@@ -87,7 +81,9 @@ class ShoppingListViewModel : ViewModel() {
 
     }
 
-    fun clearList() {
-        _shoppingItems.value = emptyList()
+    fun removeItem(item: Ingredient) {
+        viewModelScope.launch {
+            repository.removeItem(item)
+        }
     }
 }

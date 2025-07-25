@@ -7,118 +7,99 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.repository.AuthRepository
+import com.example.recipelist.data.sync.SyncManager
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel para gerenciar a autenticação do usuário e comunicação com o AuthRepository.
- * A ViewModel atua como intermediária entre a UI e o repositório, garantindo que as operações assíncronas sejam executadas de forma segura.
- */
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+class AuthViewModel(
+    private val repository: AuthRepository,
+    private val syncManager: SyncManager
+) : ViewModel() {
 
-    // Variáveis de callback para retorno do resultado do login e registro
-    var loginResult: ((Boolean) -> Unit)? = null
-    var registerResult: ((Boolean) -> Unit)? = null
+    private val auth = FirebaseAuth.getInstance()
+    private val _currentUser = MutableStateFlow<FirebaseUser?>(auth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
 
-    var isLoading by mutableStateOf(false)
-        private set
+    private val _loginSyncState = MutableStateFlow<LoginSyncState>(LoginSyncState.Idle)
+    val loginSyncState: StateFlow<LoginSyncState> = _loginSyncState.asStateFlow()
 
-    /**
-     * Método para registrar um novo usuário utilizando email e senha.
-     * Após a criação do usuário no Firebase Authentication, seus dados são armazenados no Firestore.
-     *
-     * @param email Email do usuário
-     * @param password Senha do usuário
-     * @param name Nome do usuário
-     * @param onResult Callback que retorna `true` se o registro for bem-sucedido, `false` caso contrário.
-     */
+    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        _currentUser.value = firebaseAuth.currentUser
+    }
+
+    init {
+        auth.addAuthStateListener(authStateListener)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        auth.removeAuthStateListener(authStateListener)
+    }
+
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _loginSyncState.value = LoginSyncState.Loading("A autenticar...")
+            val uid = repository.loginUser(email, password)
+            if (uid != null) {
+                performSync(uid)
+            } else {
+                _loginSyncState.value = LoginSyncState.Error("Email ou senha inválidos.")
+            }
+
+        }
+    }
+
+    private suspend fun performSync(uid: String) {
+        _loginSyncState.value = LoginSyncState.Loading("A sincronizar os seus dados...")
+        val syncSuccess = syncManager.performInitialSync(uid)
+        if (syncSuccess) {
+            _loginSyncState.value = LoginSyncState.Success
+        } else {
+            _loginSyncState.value = LoginSyncState.Error("Falha ao sincronizar os seus dados.")
+            repository.logout()
+        }
+    }
+
+    fun resetLoginSyncState() {
+        _loginSyncState.value = LoginSyncState.Idle
+    }
+
+
     fun register(email: String, password: String, name: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            isLoading = true
+            _loginSyncState.value = LoginSyncState.Loading("A registar...")
             val success = repository.registerUser(email, password, name)
-            isLoading = false
-            onResult(success) // Retorna o resultado para a UI
+            _loginSyncState.value = LoginSyncState.Idle
+            onResult(success)
         }
     }
 
-    /**
-     * Método para realizar login com email e senha.
-     * Executa a operação dentro de uma corrotina para evitar bloqueio da UI.
-     *
-     * @param email Email do usuário
-     * @param password Senha do usuário
-     * @param onResult Callback para retornar o resultado da operação (true ou false)
-     */
-    fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            isLoading = true
-            val success = repository.loginUser(email, password)
-            isLoading = false
-            onResult(success) // Notifica a UI com o resultado
-        }
-    }
-
-    /**
-     * Método para solicitar redefinição de senha.
-     * O Firebase enviará um email com um link para redefinir a senha do usuário.
-     *
-     * @param email Email do usuário
-     * @param onResult Callback para indicar sucesso ou falha na solicitação
-     */
     fun resetPassword(email: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
+            _loginSyncState.value = LoginSyncState.Loading("A enviar email...")
             val success = repository.resetPassword(email)
+            _loginSyncState.value = LoginSyncState.Idle
             onResult(success)
         }
     }
 
-    /**
-     * Método para buscar o nome do usuário atualmente autenticado.
-     * Os dados são recuperados do Firestore e passados para a interface via callback.
-     *
-     * @param onResult Callback que recebe o nome do usuário ou null se houver erro
-     */
-    fun getUserName(onResult: (String?) -> Unit) {
-        viewModelScope.launch {
-            val name = repository.getUserName()
-            onResult(name)
-        }
-    }
-
-    /**
-     * Método para realizar login com uma conta Google.
-     * Utiliza o ID Token recebido após a autenticação com o Google Sign-In.
-     *
-     * @param idToken Token do usuário autenticado pelo Google
-     * @param onResult Callback que retorna `true` se o login for bem-sucedido, `false` caso contrário.
-     */
-    fun loginWithGoogle(idToken: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            isLoading = true
-            val success = repository.loginWithGoogle(idToken)
-            isLoading = false
-            onResult(success)
-        }
-    }
-
-    /**
-     * Método para obter o cliente de login do Google.
-     * Esse cliente é usado para iniciar o fluxo de autenticação com a conta Google.
-     *
-     * @param context Contexto da aplicação necessário para inicialização
-     * @return Retorna um objeto `GoogleSignInClient` configurado.
-     */
     fun getGoogleSignInClient(context: Context): GoogleSignInClient {
         return repository.getGoogleSignInClient(context)
     }
 
-    /**
-     * Método para realizar logout do usuário.
-     * Essa função desloga o usuário do Firebase e o remove da sessão ativa.
-     */
     fun logout() {
         repository.logout()
     }
+}
 
-
+sealed class LoginSyncState {
+    object Idle : LoginSyncState()
+    data class Loading(val message: String) : LoginSyncState()
+    object Success : LoginSyncState()
+    data class Error(val message: String) : LoginSyncState()
 }

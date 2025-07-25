@@ -24,9 +24,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, onRecipeClick: (Int) -> Unit) {
     val showOnlyFavorites by homeViewModel.showOnlyFavorites.collectAsState()
 
     LaunchedEffect(Unit) {
-        homeViewModel.fetchRecipes()
+        homeViewModel.triggerRefresh()
     }
-
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {

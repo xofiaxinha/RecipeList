@@ -20,6 +20,7 @@ import com.example.recipelist.viewmodel.SettingsViewModel
 import com.example.recipelist.viewmodel.ShoppingListViewModel
 import com.example.recipelist.viewmodel.DetailViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.recipelist.data.repository.FavoritesRepository
 import com.example.recipelist.data.repository.RemoteRecipeRepository
 import com.example.recipelist.viewmodel.HomeViewModelFactory
 import com.example.recipelist.viewmodel.DetailViewModelFactory
@@ -30,7 +31,7 @@ fun MainScreen(settingsViewModel: SettingsViewModel, authViewModel: AuthViewMode
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val homeViewModel: HomeViewModel = viewModel<HomeViewModel>(
-        factory = HomeViewModelFactory(RemoteRecipeRepository())
+        factory = HomeViewModelFactory(RemoteRecipeRepository(), FavoritesRepository())
     )
     val shoppingListViewModel: ShoppingListViewModel = viewModel()
 
@@ -79,7 +80,7 @@ fun MainScreen(settingsViewModel: SettingsViewModel, authViewModel: AuthViewMode
                     val itemId = backStackEntry.arguments?.getString("itemId")?.toIntOrNull()
                     if (itemId != null) {
                         val detailViewModel: DetailViewModel = viewModel(
-                            factory = DetailViewModelFactory(RemoteRecipeRepository())
+                            factory = DetailViewModelFactory(RemoteRecipeRepository(), FavoritesRepository())
                         )
                         ItemDetails(
                             detailViewModel = detailViewModel,

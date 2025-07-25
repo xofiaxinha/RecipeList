@@ -9,13 +9,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.data.repository.FavoritesRepository
 import com.example.recipelist.data.repository.MockRecipeRepository
 import com.example.recipelist.data.repository.RecipeRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class DetailViewModel(private val repository: RecipeRepository) : ViewModel() {
+class DetailViewModel(private val repository: RecipeRepository, private val favoritesRepository: FavoritesRepository) : ViewModel() {
 
     private val _recipe = MutableStateFlow<Recipe?>(null)
     val recipe: StateFlow<Recipe?> = _recipe
@@ -54,6 +55,7 @@ class DetailViewModel(private val repository: RecipeRepository) : ViewModel() {
                 _recipe.value = r
                 _selectedServings.value = r.defaultServings
                 _selectedIngredients.value = emptySet()
+                _recipe.value?.isFavorite = favoritesRepository.isFavorite(r.id)
             }
             isLoading = false
         }
@@ -80,7 +82,17 @@ class DetailViewModel(private val repository: RecipeRepository) : ViewModel() {
     }
 
     fun toggleFavorite() {
-        _recipe.value = _recipe.value?.copy(isFavorite = _recipe.value?.isFavorite?.not() ?: false)
+        viewModelScope.launch {
+            if (_recipe.value?.isFavorite == true) {
+                favoritesRepository.removeFavorite(_recipe.value!!.id)
+                delay(1000)
+                _recipe.value = _recipe.value?.copy(isFavorite = false)
+            } else {
+                favoritesRepository.addFavorite(_recipe.value!!.id)
+                delay(1000)
+                _recipe.value = _recipe.value?.copy(isFavorite = true)
+            }
+        }
     }
 
     fun addToShoppingList(shoppingListViewModel: ShoppingListViewModel) {

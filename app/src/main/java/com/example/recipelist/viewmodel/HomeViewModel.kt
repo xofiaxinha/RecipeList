@@ -11,11 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.data.repository.FavoritesRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 
 
-class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
+class HomeViewModel(private val recipeRepository: RecipeRepository, private val favoritesRepository: FavoritesRepository) : ViewModel() {
 
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
@@ -23,6 +24,9 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
     val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _favoriteRecipes = MutableStateFlow<List<Recipe>>(emptyList())
+    val favoriteRecipes: StateFlow<List<Recipe>> = _favoriteRecipes
 
     var isLoading by mutableStateOf(false)
         private set
@@ -62,8 +66,11 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
         if (!recipesFetched) {
             viewModelScope.launch {
                 isLoading = true
-                val fetchedRecipes = repository.getAllRecipes()
+                val fetchedRecipes = recipeRepository.getAllRecipes()
                 _recipes.value = fetchedRecipes
+                val favoriteIds = favoritesRepository.getFavorites()
+                _favoriteRecipes.value = fetchedRecipes.filter { favoriteIds.contains(it.id) }
+                recipesFetched = true
                 isLoading = false
             }
         }

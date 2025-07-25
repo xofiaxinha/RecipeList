@@ -53,11 +53,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             this,
             AuthViewModelFactory(authRepository, syncManager)
         ).get(AuthViewModel::class.java)
-
         setContent {
             val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
             RecipeListTheme(darkTheme = isDarkTheme) {
                 MainScreen(settingsViewModel = settingsViewModel, authViewModel = authViewModel)
+
             }
         }
     }

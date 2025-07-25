@@ -51,7 +51,6 @@ fun DrawerContent(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally

@@ -36,7 +36,6 @@ fun CadastroScreen(viewModel: AuthViewModel, navController: NavController){
     var validEmail by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
-
     val loginState by viewModel.loginSyncState.collectAsState()
 
     Column(

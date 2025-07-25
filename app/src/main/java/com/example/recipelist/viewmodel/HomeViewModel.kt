@@ -1,38 +1,52 @@
 package com.example.recipelist.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.recipelist.data.repository.RecipeRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.model.Recipe
+import com.example.recipelist.data.repository.FavoritesRepository
+import com.example.recipelist.data.repository.RecipeRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-
-class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
-
-
-    private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
-    private val _showOnlyFavorites = MutableStateFlow(false)
-    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
+class HomeViewModel(
+    private val recipeRepository: RecipeRepository,
+    private val favoritesRepository: FavoritesRepository
+) : ViewModel() {
 
     var isLoading by mutableStateOf(false)
         private set
-    val allRecipes: StateFlow<List<Recipe>> = _recipes
-    private var recipesFetched = false
+
+    private val _showOnlyFavorites = MutableStateFlow(false)
+    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val recipesFromRepo: Flow<List<Recipe>> = recipeRepository.getAllRecipes()
+
+    private val favoriteIdsFlow: Flow<List<Int>> = favoritesRepository.getFavorites()
 
     val filteredRecipes: StateFlow<List<Recipe>> =
-        combine(_recipes, _searchQuery, _showOnlyFavorites) { recipes, query, onlyFavorites ->
-            var filteredList = recipes
+        combine(
+            recipesFromRepo,
+            favoriteIdsFlow,
+            _searchQuery,
+            _showOnlyFavorites
+        ) { recipes, favoriteIds, query, onlyFavorites ->
 
+            val recipesWithUpdatedFavorites = recipes.map { recipe ->
+                recipe.copy(isFavorite = favoriteIds.contains(recipe.id))
+            }
+
+            var filteredList = recipesWithUpdatedFavorites
 
             if (onlyFavorites) {
                 filteredList = filteredList.filter { it.isFavorite }
@@ -48,36 +62,25 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    fun onFavoritesFilterChanged(isChecked: Boolean) {
-        _showOnlyFavorites.value = isChecked
-    }
-    fun getRecipeById(id: Int): Recipe? {
-        return _recipes.value.find { it.id == id }
-    }
-    fun onSearchQueryChanged(query: String) {
-        _searchQuery.value = query
-    }
 
-    fun fetchRecipes() {
-        if (!recipesFetched) {
-            viewModelScope.launch {
-                isLoading = true
-                val fetchedRecipes = repository.getAllRecipes()
-                _recipes.value = fetchedRecipes
+    fun triggerRefresh() {
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                recipeRepository.refreshRecipes()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
                 isLoading = false
             }
         }
     }
 
-    fun setFavoriteStatus(recipeId: Int, isFavorite: Boolean) {
-        val currentList = _recipes.value
-        val updatedList = currentList.map { recipe ->
-            if (recipe.id == recipeId) {
-                recipe.copy(isFavorite = isFavorite)
-            } else {
-                recipe
-            }
-        }
-        _recipes.value = updatedList
+    fun onFavoritesFilterChanged(isChecked: Boolean) {
+        _showOnlyFavorites.value = isChecked
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
     }
 }

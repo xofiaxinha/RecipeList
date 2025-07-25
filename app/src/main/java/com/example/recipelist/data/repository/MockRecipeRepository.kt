@@ -1,13 +1,22 @@
-
 package com.example.recipelist.data.repository
 
 import com.example.recipelist.data.model.Recipe
 import com.example.recipelist.data.util.MockDataProvider
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 class MockRecipeRepository : RecipeRepository {
     private val recipes = MockDataProvider.sampleRecipes
 
-    override suspend fun getAllRecipes(): List<Recipe> = recipes
+
+    override fun getAllRecipes(): Flow<List<Recipe>> {
+
+        return flowOf(recipes)
+    }
+
+    override suspend fun refreshRecipes() {
+
+    }
 
     override suspend fun getRecipeById(id: Int): Recipe? = recipes.find { it.id == id }
 

@@ -38,13 +38,13 @@ class AuthRepository {
         }
     }
 
-    suspend fun loginUser(email: String, password: String):Boolean{
+    suspend fun loginUser(email: String, password: String): String? {
         return try {
-            auth.signInWithEmailAndPassword(email, password).await()
-            true
-        }catch (e: Exception){
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            result.user?.uid
+        } catch (e: Exception) {
             Log.e("AuthRepository", "login error", e)
-            false
+            null
         }
     }
 
@@ -75,13 +75,13 @@ class AuthRepository {
 
     fun getGoogleSignInClient(context: Context): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id)) // Token do cliente configurado no Firebase
-            .requestEmail() // Solicita o email do usuário
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
             .build()
         return GoogleSignIn.getClient(context, gso)
     }
 
-    suspend fun loginWithGoogle(idToken: String): Boolean {
+    suspend fun loginWithGoogle(idToken: String): String? {
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val result = auth.signInWithCredential(credential).await()
@@ -104,10 +104,10 @@ class AuthRepository {
                     userRef.set(userData).await()
                 }
             }
-            true
-        }catch (e: Exception){
-            Log.e("AuthRepository", "login error", e)
-            false
+            user?.uid
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "login with google error", e)
+            null
         }
     }
 

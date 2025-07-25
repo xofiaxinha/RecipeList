@@ -18,7 +18,6 @@ import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.ui.components.AddItemForm
 import com.example.recipelist.ui.components.ShoppingItemList
 import com.example.recipelist.viewmodel.ShoppingListViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
@@ -27,6 +26,7 @@ fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
     var itemName by remember { mutableStateOf("") }
     var quantityString by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
+
 
     Column(
         modifier = Modifier
@@ -59,10 +59,4 @@ fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
             }
         )
     }
-}
-
-@Preview
-@Composable
-fun ShoppingListScreenPreview(shoppingListViewModel: ShoppingListViewModel = ShoppingListViewModel()) {
-    ShoppingListScreen(shoppingListViewModel)
 }

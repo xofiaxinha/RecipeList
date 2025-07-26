@@ -1,9 +1,6 @@
 package com.example.recipelist.viewmodel
 
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipelist.data.repository.AuthRepository
@@ -50,7 +47,18 @@ class AuthViewModel(
             } else {
                 _loginSyncState.value = LoginSyncState.Error("Email ou senha inválidos.")
             }
+        }
+    }
 
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _loginSyncState.value = LoginSyncState.Loading("A autenticar com o Google...")
+            val uid = repository.loginWithGoogle(idToken)
+            if (uid != null) {
+                performSync(uid)
+            } else {
+                _loginSyncState.value = LoginSyncState.Error("Falha no login com o Google.")
+            }
         }
     }
 

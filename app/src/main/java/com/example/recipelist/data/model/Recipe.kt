@@ -1,18 +1,31 @@
-// pacote onde o arquivo está localizado
 package com.example.recipelist.data.model
 
-// classe que representa uma receita
+import com.google.gson.annotations.SerializedName
+
+
 data class Recipe(
-        val id: Int, // id da receita
-        val name: String, // nome da receita
-        val ingredients: List<Ingredient>, // lista de ingredientes
-        val defaultServings: Int, // porções padrão
-        val isFavorite: Boolean, // se é receita favorita ou não
-        val imageRes: Int,
-        val description: String,
+        @SerializedName("id")
+        val id: Int,
+
+        @SerializedName("name")
+        val name: String,
+
+        @SerializedName("ingredients")
+        val ingredients: List<Ingredient>,
+
+        @SerializedName("defaultServings")
+        val defaultServings: Int,
+
+        @SerializedName("isFavorite")
+        var isFavorite: Boolean,
+
+        @SerializedName("imageUrl")
+        val imageUrl: String,
+
+        @SerializedName("description")
+        val description: String
 )
 
-// enum para filtrar receitas
 enum class RecipeFilter {
         ALL, // todas as receitas
         FAVORITE // apenas favoritas

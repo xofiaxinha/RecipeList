@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +19,6 @@ import com.example.recipelist.data.model.Ingredient
 import com.example.recipelist.ui.components.AddItemForm
 import com.example.recipelist.ui.components.ShoppingItemList
 import com.example.recipelist.viewmodel.ShoppingListViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
@@ -27,7 +27,6 @@ fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
     var itemName by remember { mutableStateOf("") }
     var quantityString by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,10 +58,4 @@ fun ShoppingListScreen(shoppingListViewModel: ShoppingListViewModel) {
             }
         )
     }
-}
-
-@Preview
-@Composable
-fun ShoppingListScreenPreview(shoppingListViewModel: ShoppingListViewModel = ShoppingListViewModel()) {
-    ShoppingListScreen(shoppingListViewModel)
 }

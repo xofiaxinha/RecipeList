@@ -1,39 +1,43 @@
 package com.example.recipelist.ui.components
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.recipelist.viewmodel.AuthViewModel
 import com.example.recipelist.viewmodel.SettingsViewModel
-import androidx. compose. runtime.getValue
+
 @Composable
 fun DrawerContent(
     navController: NavHostController,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    authViewModel: AuthViewModel
 ) {
     val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+    val currentUser by authViewModel.currentUser.collectAsState()
+
+
+    val isOnline by connectivityState()
 
     Surface(
         modifier = Modifier
@@ -44,14 +48,42 @@ fun DrawerContent(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = "MENU",
-                style = MaterialTheme.typography.headlineSmall, // Um estilo um pouco maior
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Ícone de Perfil",
+                        modifier = Modifier.size(60.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(if (isOnline) Color(0xFF4CAF50) else Color(0xFFF44336))
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+
+                    text = currentUser?.email ?: "Não autenticado",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Divider(modifier = Modifier.padding(vertical = 24.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -61,26 +93,39 @@ fun DrawerContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "TELAS",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Lista de Compras",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { navController.navigate("lista") }
-                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp) // Adiciona um recuo
-            )
             Text(
                 text = "Receitas",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { navController.navigate("home") }
-                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp) // Adiciona um recuo
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
+            )
+            Text(
+                text = "Lista de Compras",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate("lista") }
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
+            )
+            Text(
+                text = "Mudar Conta",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        authViewModel.logout()
+                        navController.navigate("login") {
+                            popUpTo(0)
+                        }
+                    }
+                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -93,7 +138,7 @@ fun DrawerContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "OPÇÕES",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -139,3 +184,49 @@ fun DrawerContent(
     }
 }
 
+/**
+ * NOVO: Um Composable que observa o estado da conectividade em tempo real e
+ * retorna um State<Boolean> que faz a UI recompor-se automaticamente.
+ */
+@Composable
+private fun connectivityState(): State<Boolean> {
+    val context = LocalContext.current
+
+    return produceState(initialValue = isOnline(context)) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                value = true
+            }
+            override fun onLost(network: Network) {
+                value = false
+            }
+        }
+
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+
+        connectivityManager.registerNetworkCallback(networkRequest, callback)
+
+        awaitDispose {
+            connectivityManager.unregisterNetworkCallback(callback)
+        }
+    }
+}
+
+/**
+ * Função utilitária que agora é usada apenas para obter o estado inicial da rede.
+ */
+private fun isOnline(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+    return when {
+        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+        activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+        else -> false
+    }
+}
